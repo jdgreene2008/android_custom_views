@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -15,6 +16,7 @@ import android.widget.OverScroller;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.graphics.ColorUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,9 +41,13 @@ public class GestureExperimentView extends FrameLayout {
     private OverScroller mScroller;
 
     private List<List<MovableObject>> mMovableObjectRails;
+    private List<ColorInterpolator> mColorInterpolators;
 
-    private static final int[] COLORS =
+    private static final int[] COLORS_OBJECTS =
             new int[] {Color.RED, Color.GREEN, Color.BLUE, Color.YELLOW};
+
+    private static final int[] COLORS_BACKGROUNDS =
+            new int[] {Color.MAGENTA, Color.CYAN, Color.LTGRAY};
 
     private ScrollListener mListener;
 
@@ -130,15 +136,23 @@ public class GestureExperimentView extends FrameLayout {
                     ((g == railCount - 1) ? (getMeasuredWidth() - gapX) :
                             (gapX + getMeasuredWidth() / railCount)));
             for (int i = 0; i < 5; i++) {
-                int color = COLORS[(i % COLORS.length)];
+                int color = COLORS_OBJECTS[(i % COLORS_OBJECTS.length)];
                 rail.add(new MovableObject(railX, railY + gapY * i,
-                        "12345", color));
+                        "1", color));
             }
             mMovableObjectRails.add(rail);
         }
 
         mContentHeight = getMeasuredHeight() * (2 + railCount) - (100 * railCount);
         mContentWidth = getMeasuredWidth() * 2;
+
+        mColorInterpolators = new ArrayList<>(railCount);
+
+        for (int i = 0; i < railCount; i++) {
+            ColorInterpolator interpolator = new ColorInterpolator(getMeasuredHeight());
+            interpolator.setColor(COLORS_BACKGROUNDS[i]);
+            mColorInterpolators.add(interpolator);
+        }
     }
 
     @Override
@@ -416,7 +430,7 @@ public class GestureExperimentView extends FrameLayout {
     }
 
     /**
-     * <p>The horizontal scroll range of the view is the overall height of all of its
+     * <p>The horizontal scroll range of the view is the overall width of all of its
      * children.</p>
      */
     @Override
@@ -558,32 +572,79 @@ public class GestureExperimentView extends FrameLayout {
     @Override
     protected void onDraw(Canvas canvas) {
         if (mMovableObjectRails != null) {
-            for (List<MovableObject> rail : mMovableObjectRails) {
-                drawRail(canvas, rail);
+            for (int i = 0; i < mMovableObjectRails.size(); i++) {
+                drawRail(canvas, mMovableObjectRails.get(i), mColorInterpolators.get(i));
             }
         }
 
         super.onDraw(canvas);
     }
 
-    private void drawRail(Canvas canvas, List<MovableObject> objects) {
-        final int offset = 20;
+    private void drawRail(Canvas canvas, List<MovableObject> objects,
+            ColorInterpolator railBackground) {
+        final int offset = 25;
+        final int radius = 50;
         int count = 0;
 
         Paint paint = new Paint();
         for (MovableObject object : objects) {
             paint.setColor(object.getColor());
-            if (object.getYPos() > (getScrollY() + getHeight())) continue;
+            final int objectIndex = objects.indexOf(object);
+
+            if (object.getYPos() > (getScrollY() + getHeight())) {
+                // Check to see if this is the first one. If it is, we can return immediately.
+
+                if (objectIndex == 0) break;
+                continue;
+            }
+            if (objectIndex == 0) {
+                railBackground.updateValue(
+                        railBackground.maxValue - (object.getYPos() - getScrollY()));
+            }
             if (getScrollY() >= object.getYPos()) {
+                /* Means we've scrolled to the top of the visible part of the view.
+                  If the first object is being drawn, draw the background rectangle based on that
+                  knowledge since it must be drawn behind the views. */
+                int yPosition = getScrollY() + (offset * count);
+
+                if (objectIndex == 0) {
+                    // Background must be drawn before anything else.
+                    drawShadedBackground(canvas, railBackground, yPosition);
+                }
+
                 canvas.drawCircle(object.getXPos(),
-                        getScrollY() + (offset * count), 50, paint);
+                        getScrollY() + (offset * count), radius, paint);
             } else {
-                canvas.drawCircle(object.getXPos(),
-                        object.getYPos(), 50, paint);
+                int yPosition = object.getYPos();
+
+                if (objectIndex == 0) {
+                    drawShadedBackground(canvas, railBackground, yPosition - radius);
+                }
+
+                canvas.drawCircle(object.getXPos(), yPosition, radius, paint);
             }
 
             count++;
         }
+    }
+
+    private void drawShadedBackground(Canvas canvas, ColorInterpolator interpolator,
+            int yPosition) {
+        // Determine bounds of the shaded region.
+        int rectTop = yPosition;
+        int rectLeft = 0;
+        int rectRight = getMeasuredWidth();
+        int rectBottom = interpolator.getValue() + rectTop + 50;
+        Rect shadeRect = new Rect(rectLeft, rectTop, rectRight, rectBottom);
+
+        // Compute shade based on interpolation.
+        int shade = ColorUtils.setAlphaComponent(interpolator.mColor,
+                (int)(interpolator.getInterpolatedValue() * 255));
+
+        Paint paint = new Paint();
+        paint.setColor(shade);
+        paint.setStyle(Paint.Style.FILL);
+        canvas.drawRect(shadeRect, paint);
     }
 
     private void updateDragState(boolean isBeingDragged) {
@@ -633,6 +694,49 @@ public class GestureExperimentView extends FrameLayout {
 
         public void setColor(int color) {
             mColor = color;
+        }
+    }
+
+    public static class ColorInterpolator {
+
+        private final int maxValue;
+        private int mValue;
+        private float mInterpolatedValue;
+        private int mColor = Color.BLACK;
+
+        ColorInterpolator(int maxValue) {
+            this.maxValue = maxValue;
+        }
+
+        int getValue() {
+            return mValue;
+        }
+
+        void updateValue(int value) {
+            mValue = value;
+            calculateInterpolatedValue();
+        }
+
+        private void calculateInterpolatedValue() {
+            if (mValue >= maxValue) {
+                mInterpolatedValue = 1.0f;
+            } else if (maxValue <= 0) {
+                mInterpolatedValue = 0f;
+            } else {
+                mInterpolatedValue = ((float)Math.abs(mValue) / (float)maxValue);
+            }
+        }
+
+        public int getColor() {
+            return mColor;
+        }
+
+        public void setColor(int color) {
+            mColor = color;
+        }
+
+        public float getInterpolatedValue() {
+            return mInterpolatedValue;
         }
     }
 
