@@ -20,8 +20,8 @@ import androidx.core.graphics.ColorUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GestureExperimentView extends FrameLayout {
-    private static final String TAG = GestureExperimentView.class.getName();
+public class CustomScrollingView extends FrameLayout {
+    private static final String TAG = CustomScrollingView.class.getName();
     /**
      * ID of the active pointer. This is used to retain consistency during
      * drags/flings if multiple pointers are used.
@@ -74,18 +74,18 @@ public class GestureExperimentView extends FrameLayout {
     private int mOverscrollDistance;
     private int mOverflingDistance;
 
-    public GestureExperimentView(@NonNull Context context) {
+    public CustomScrollingView(@NonNull Context context) {
         super(context);
         initGestureExperimentView();
     }
 
-    public GestureExperimentView(@NonNull Context context,
+    public CustomScrollingView(@NonNull Context context,
             @Nullable AttributeSet attrs) {
         super(context, attrs);
         initGestureExperimentView();
     }
 
-    public GestureExperimentView(@NonNull Context context, @Nullable AttributeSet attrs,
+    public CustomScrollingView(@NonNull Context context, @Nullable AttributeSet attrs,
             int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         initGestureExperimentView();
