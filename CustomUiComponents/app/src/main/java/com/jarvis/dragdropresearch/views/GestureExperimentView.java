@@ -6,7 +6,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.ViewConfiguration;
@@ -131,7 +130,7 @@ public class GestureExperimentView extends FrameLayout {
 
         for (int g = 0; g < railCount; g++) {
             ArrayList<MovableObject> rail = new ArrayList<>();
-            final int railY = (g + 1) * getMeasuredHeight() - 100 * (g + 1);
+            final int railY = (g + 1) * getMeasuredHeight() - 100 * g;
             final int railX = ((g == 0) ? gapX :
                     ((g == railCount - 1) ? (getMeasuredWidth() - gapX) :
                             (gapX + getMeasuredWidth() / railCount)));
@@ -488,22 +487,7 @@ public class GestureExperimentView extends FrameLayout {
     @Override
     public void computeScroll() {
         if (mScroller.computeScrollOffset()) {
-            // This is called at drawing time by ViewGroup.  We don't want to
-            // re-show the scrollbars at this point, which scrollTo will do,
-            // so we replicate most of scrollTo here.
-            //
-            //         It's a little odd to call onScrollChanged from inside the drawing.
-            //
-            //         It is, except when you remember that computeScroll() is used to
-            //         animate scrolling. So unless we want to defer the onScrollChanged()
-            //         until the end of the animated scrolling, we don't really have a
-            //         choice here.
-            //
-            //         I agree.  The alternative, which I think would be worse, is to post
-            //         something and tell the subclasses later.  This is bad because there
-            //         will be a window where mScrollX/Y is different from what the app
-            //         thinks it is.
-            //
+            // This is called at drawing time by ViewGroup.
             int oldX = getScrollX();
             int oldY = getScrollY();
             int x = mScroller.getCurrX();
@@ -530,7 +514,6 @@ public class GestureExperimentView extends FrameLayout {
      */
     @Override
     public void scrollTo(int x, int y) {
-        Log.d(TAG, "scrollTo() called with positions X->" + x + ", y->" + y);
         x = clamp(x, getWidth(), mContentWidth);
         y = clamp(y, getHeight(), mContentHeight);
         if (x != getScrollX() || y != getScrollY()) {
@@ -598,8 +581,9 @@ public class GestureExperimentView extends FrameLayout {
                 continue;
             }
             if (objectIndex == 0) {
+                railBackground.setMaxValue(getMeasuredHeight());
                 railBackground.updateValue(
-                        railBackground.maxValue - (object.getYPos() - getScrollY()));
+                        railBackground.mMaxValue - (object.getYPos() - getScrollY()));
             }
             if (getScrollY() >= object.getYPos()) {
                 /* Means we've scrolled to the top of the visible part of the view.
@@ -699,17 +683,21 @@ public class GestureExperimentView extends FrameLayout {
 
     public static class ColorInterpolator {
 
-        private final int maxValue;
+        private int mMaxValue;
         private int mValue;
         private float mInterpolatedValue;
         private int mColor = Color.BLACK;
 
         ColorInterpolator(int maxValue) {
-            this.maxValue = maxValue;
+            this.mMaxValue = maxValue;
         }
 
         int getValue() {
             return mValue;
+        }
+
+        public void setMaxValue(int maxValue) {
+            mMaxValue = maxValue;
         }
 
         void updateValue(int value) {
@@ -718,12 +706,12 @@ public class GestureExperimentView extends FrameLayout {
         }
 
         private void calculateInterpolatedValue() {
-            if (mValue >= maxValue) {
+            if (mValue >= mMaxValue) {
                 mInterpolatedValue = 1.0f;
-            } else if (maxValue <= 0) {
+            } else if (mMaxValue <= 0) {
                 mInterpolatedValue = 0f;
             } else {
-                mInterpolatedValue = ((float)Math.abs(mValue) / (float)maxValue);
+                mInterpolatedValue = ((float)Math.abs(mValue) / (float)mMaxValue);
             }
         }
 
