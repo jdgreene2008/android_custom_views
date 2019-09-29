@@ -122,6 +122,10 @@ public class GestureExperimentView extends FrameLayout {
 
     private void initializeObjects() {
         mInitializedObjects = true;
+        positionObjects(getMeasuredWidth(), getMeasuredHeight());
+    }
+
+    private void positionObjects(int viewWidth, int viewHeight) {
         final int railCount = 3;
         mMovableObjectRails = new ArrayList<>(railCount);
 
@@ -130,10 +134,11 @@ public class GestureExperimentView extends FrameLayout {
 
         for (int g = 0; g < railCount; g++) {
             ArrayList<MovableObject> rail = new ArrayList<>();
-            final int railY = (g + 1) * getMeasuredHeight() - 100 * g;
+
+            final int railY = (g + 1) * viewHeight - 100 * g;
             final int railX = ((g == 0) ? gapX :
-                    ((g == railCount - 1) ? (getMeasuredWidth() - gapX) :
-                            (gapX + getMeasuredWidth() / railCount)));
+                    ((g == railCount - 1) ? (viewWidth - gapX) :
+                            (gapX + viewWidth / railCount)));
             for (int i = 0; i < 5; i++) {
                 int color = COLORS_OBJECTS[(i % COLORS_OBJECTS.length)];
                 rail.add(new MovableObject(railX, railY + gapY * i,
@@ -142,13 +147,13 @@ public class GestureExperimentView extends FrameLayout {
             mMovableObjectRails.add(rail);
         }
 
-        mContentHeight = getMeasuredHeight() * (2 + railCount) - (100 * railCount);
-        mContentWidth = getMeasuredWidth() * 2;
+        mContentHeight = viewHeight * (2 + railCount) - (100 * railCount);
+        mContentWidth = viewWidth * 2;
 
         mColorInterpolators = new ArrayList<>(railCount);
 
         for (int i = 0; i < railCount; i++) {
-            ColorInterpolator interpolator = new ColorInterpolator(getMeasuredHeight());
+            ColorInterpolator interpolator = new ColorInterpolator(viewHeight);
             interpolator.setColor(COLORS_BACKGROUNDS[i]);
             mColorInterpolators.add(interpolator);
         }
@@ -556,14 +561,60 @@ public class GestureExperimentView extends FrameLayout {
     protected void onDraw(Canvas canvas) {
         if (mMovableObjectRails != null) {
             for (int i = 0; i < mMovableObjectRails.size(); i++) {
-                drawRail(canvas, mMovableObjectRails.get(i), mColorInterpolators.get(i));
+                drawBackground(canvas, mMovableObjectRails.get(i), mColorInterpolators.get(i));
+            }
+            for (int i = 0; i < mMovableObjectRails.size(); i++) {
+                drawRail(canvas, mMovableObjectRails.get(i));
             }
         }
 
         super.onDraw(canvas);
     }
 
-    private void drawRail(Canvas canvas, List<MovableObject> objects,
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        positionObjects(w, h);
+        invalidate();
+    }
+
+    private void drawRail(Canvas canvas, List<MovableObject> objects) {
+        final int offset = 25;
+        final int radius = 50;
+        int count = 0;
+
+        Paint paint = new Paint();
+        for (MovableObject object : objects) {
+            paint.setColor(object.getColor());
+            final int objectIndex = objects.indexOf(object);
+
+            if (object.getYPos() > (getScrollY() + getHeight())) {
+                // Check to see if this is the first one. If it is, we can return immediately.
+
+                if (objectIndex == 0) break;
+                continue;
+            }
+
+            if (getScrollY() >= object.getYPos()) {
+                /* Means we've scrolled to the top of the visible part of the view.
+                  If the first object is being drawn, draw the background rectangle based on that
+                  knowledge since it must be drawn behind the views. */
+                canvas.drawCircle(object.getXPos(),
+                        getScrollY() + (offset * count), radius, paint);
+            } else {
+                int yPosition = object.getYPos();
+                canvas.drawCircle(object.getXPos(), yPosition, radius, paint);
+            }
+
+            count++;
+        }
+    }
+
+    /**
+     * Separate the background drawing logic from the rail drawing logic. Backgrounds should
+     * be drawn before rail drawing starts.
+     */
+    private void drawBackground(Canvas canvas, List<MovableObject> objects,
             ColorInterpolator railBackground) {
         final int offset = 25;
         final int radius = 50;
@@ -581,31 +632,19 @@ public class GestureExperimentView extends FrameLayout {
                 continue;
             }
             if (objectIndex == 0) {
-                railBackground.setMaxValue(getMeasuredHeight());
                 railBackground.updateValue(
                         railBackground.mMaxValue - (object.getYPos() - getScrollY()));
             }
             if (getScrollY() >= object.getYPos()) {
-                /* Means we've scrolled to the top of the visible part of the view.
-                  If the first object is being drawn, draw the background rectangle based on that
-                  knowledge since it must be drawn behind the views. */
                 int yPosition = getScrollY() + (offset * count);
-
                 if (objectIndex == 0) {
-                    // Background must be drawn before anything else.
                     drawShadedBackground(canvas, railBackground, yPosition);
                 }
-
-                canvas.drawCircle(object.getXPos(),
-                        getScrollY() + (offset * count), radius, paint);
             } else {
                 int yPosition = object.getYPos();
-
                 if (objectIndex == 0) {
                     drawShadedBackground(canvas, railBackground, yPosition - radius);
                 }
-
-                canvas.drawCircle(object.getXPos(), yPosition, radius, paint);
             }
 
             count++;
