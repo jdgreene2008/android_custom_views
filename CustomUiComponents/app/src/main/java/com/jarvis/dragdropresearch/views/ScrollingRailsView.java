@@ -7,13 +7,16 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 
+import com.jarvis.dragdropresearch.rails.domain.ColorInterpolator;
+import com.jarvis.dragdropresearch.rails.domain.MovableObject;
+
 import androidx.annotation.Nullable;
 import androidx.core.graphics.ColorUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ScrollingRailsView extends CustomScrollingView {
+public class ScrollingRailsView extends CustomScrollingView<RailPage> {
 
     private List<List<MovableObject>> mMovableObjectRails;
     private List<ColorInterpolator> mColorInterpolators;
@@ -37,9 +40,46 @@ public class ScrollingRailsView extends CustomScrollingView {
         super(context, attrs, defStyleAttr);
     }
 
-    public void initializeObjects() {
-        setInitializedObjects(true);
-        positionObjects(getMeasuredWidth(), getMeasuredHeight());
+    protected void initializePages() {
+        setInitializedPages(true);
+        // TODO: Current positionObjects(getMeasuredWidth(), getMeasuredHeight());
+        setupPages();
+    }
+
+    private void setupPages() {
+        final int pageCount = 3;
+        mPages = new ArrayList<>(pageCount);
+
+        // Assumes fixed-size pages for now.
+        for (int i = 1; i <= pageCount; i++) {
+            RailPage page = new RailPage();
+            page.setHeight(getMeasuredHeight());
+            page.setWidth(getMeasuredWidth());
+            page.setXPosition(0);
+            page.setYPosition(i * getMeasuredHeight());
+            mPages.add(page);
+        }
+
+        final int gapY = 100;
+        final int gapX = 200;
+
+        for (int g = 0; g < pageCount; g++) {
+            RailPage currentPage = mPages.get(g);
+
+            final int railY = (g + 1) * currentPage.getHeight();
+            final int railX = ((g == 0) ? gapX :
+                    ((g == pageCount - 1) ? (currentPage.getWidth() - gapX) :
+                            (gapX + currentPage.getWidth() / pageCount)));
+            for (int i = 0; i < 5; i++) {
+                int color = COLORS_OBJECTS[(i % COLORS_OBJECTS.length)];
+                currentPage.addObject(new MovableObject(railX, railY + gapY * i,
+                        "1", color));
+            }
+
+            ColorInterpolator interpolator = new ColorInterpolator(currentPage.getHeight());
+            interpolator.setColor(COLORS_BACKGROUNDS[g]);
+            currentPage.setColorInterpolator(interpolator);
+        }
     }
 
     private void positionObjects(int viewWidth, int viewHeight) {
@@ -78,16 +118,20 @@ public class ScrollingRailsView extends CustomScrollingView {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if (mMovableObjectRails != null) {
-            for (int i = 0; i < mMovableObjectRails.size(); i++) {
-                drawBackground(canvas, mMovableObjectRails.get(i), mColorInterpolators.get(i));
+        drawPages(canvas);
+        super.onDraw(canvas);
+    }
+
+    private void drawPages(Canvas canvas) {
+        if (mPages != null) {
+            for (RailPage page : mPages) {
+                drawBackground(canvas, page);
             }
-            for (int i = 0; i < mMovableObjectRails.size(); i++) {
-                drawRail(canvas, mMovableObjectRails.get(i));
+
+            for (RailPage page : mPages) {
+                drawPageRail(page, canvas);
             }
         }
-
-        super.onDraw(canvas);
     }
 
     @Override
@@ -97,23 +141,28 @@ public class ScrollingRailsView extends CustomScrollingView {
         invalidate();
     }
 
-    private void drawRail(Canvas canvas, List<MovableObject> objects) {
+    @Override
+    protected void onScrollChanged(int l, int t, int oldl, int oldt) {
+        super.onScrollChanged(l, t, oldl, oldt);
+    }
+
+    private void drawPageRail(RailPage page, Canvas canvas) {
+        if (!page.isVisible()) return;
+
         final int offset = 25;
         final int radius = 50;
-        int count = 0;
 
+        List<MovableObject> pageObjects =page.getMovableObjectRails();
         Paint paint = new Paint();
-        for (MovableObject object : objects) {
+
+        int count = 0;
+        for (MovableObject object : pageObjects) {
             paint.setColor(object.getColor());
-            final int objectIndex = objects.indexOf(object);
-
-            if (object.getYPos() > (getScrollY() + getHeight())) {
-                // Check to see if this is the first one. If it is, we can return immediately.
-
-                if (objectIndex == 0) break;
-                continue;
+            if (object.getYPos() > (getMeasuredHeight() + getScrollY())) {
+                // Object is off-screen and any objects that follow it is off-screen. No need to
+                // continue traversal.
+                break;
             }
-
             if (getScrollY() >= object.getYPos()) {
                 /* Means we've scrolled to the top of the visible part of the object to draw. */
                 canvas.drawCircle(object.getXPos(),
@@ -127,44 +176,12 @@ public class ScrollingRailsView extends CustomScrollingView {
         }
     }
 
-    /**
-     * Separate the background drawing logic from the rail drawing logic. Backgrounds should
-     * be drawn before rail drawing starts.
-     */
-    private void drawBackground(Canvas canvas, List<MovableObject> objects,
-            ColorInterpolator railBackground) {
-        final int offset = 25;
-        final int radius = 50;
-        int count = 0;
-
-        Paint paint = new Paint();
-        for (MovableObject object : objects) {
-            paint.setColor(object.getColor());
-            final int objectIndex = objects.indexOf(object);
-
-            if (object.getYPos() > (getScrollY() + getHeight())) {
-                // Check to see if this is the first one. If it is, we can return immediately.
-
-                if (objectIndex == 0) break;
-                continue;
-            }
-            if (objectIndex == 0) {
-                railBackground.updateValue(
-                        railBackground.mMaxValue - (object.getYPos() - getScrollY()));
-            }
-            if (getScrollY() >= object.getYPos()) {
-                int yPosition = getScrollY() + (offset * count);
-                if (objectIndex == 0) {
-                    drawShadedBackground(canvas, railBackground, yPosition);
-                }
-            } else {
-                int yPosition = object.getYPos();
-                if (objectIndex == 0) {
-                    drawShadedBackground(canvas, railBackground, yPosition - radius);
-                }
-            }
-
-            count++;
+    private void drawBackground(Canvas canvas, RailPage page) {
+        if (page.isVisible()) {
+            ColorInterpolator interpolator = page.getColorInterpolator();
+            interpolator
+                    .updateValue(interpolator.getMaxValue() - (page.getYPosition() - getScrollY()));
+            drawShadedBackground(canvas, interpolator, page.getYPosition());
         }
     }
 
@@ -178,98 +195,12 @@ public class ScrollingRailsView extends CustomScrollingView {
         Rect shadeRect = new Rect(rectLeft, rectTop, rectRight, rectBottom);
 
         // Compute shade based on interpolation.
-        int shade = ColorUtils.setAlphaComponent(interpolator.mColor,
+        int shade = ColorUtils.setAlphaComponent(interpolator.getColor(),
                 (int)(interpolator.getInterpolatedValue() * 255));
 
         Paint paint = new Paint();
         paint.setColor(shade);
         paint.setStyle(Paint.Style.FILL);
         canvas.drawRect(shadeRect, paint);
-    }
-
-    public static class MovableObject {
-
-        private int mXPos;
-        private int mYPos;
-        private String mId;
-        private int mColor;
-
-        public MovableObject(int initialX, int initialY, String id, int color) {
-            mXPos = initialX;
-            mYPos = initialY;
-            mId = id;
-            mColor = color;
-        }
-
-        public int getXPos() {
-            return mXPos;
-        }
-
-        public void setXPos(int XPos) {
-            mXPos = XPos;
-        }
-
-        public int getYPos() {
-            return mYPos;
-        }
-
-        public void setYPos(int YPos) {
-            mYPos = YPos;
-        }
-
-        public int getColor() {
-            return mColor;
-        }
-
-        public void setColor(int color) {
-            mColor = color;
-        }
-    }
-
-    public static class ColorInterpolator {
-
-        private int mMaxValue;
-        private int mValue;
-        private float mInterpolatedValue;
-        private int mColor = Color.BLACK;
-
-        ColorInterpolator(int maxValue) {
-            this.mMaxValue = maxValue;
-        }
-
-        int getValue() {
-            return mValue;
-        }
-
-        public void setMaxValue(int maxValue) {
-            mMaxValue = maxValue;
-        }
-
-        void updateValue(int value) {
-            mValue = value;
-            calculateInterpolatedValue();
-        }
-
-        private void calculateInterpolatedValue() {
-            if (mValue >= mMaxValue) {
-                mInterpolatedValue = 1.0f;
-            } else if (mMaxValue <= 0) {
-                mInterpolatedValue = 0f;
-            } else {
-                mInterpolatedValue = ((float)Math.abs(mValue) / (float)mMaxValue);
-            }
-        }
-
-        public int getColor() {
-            return mColor;
-        }
-
-        public void setColor(int color) {
-            mColor = color;
-        }
-
-        public float getInterpolatedValue() {
-            return mInterpolatedValue;
-        }
     }
 }

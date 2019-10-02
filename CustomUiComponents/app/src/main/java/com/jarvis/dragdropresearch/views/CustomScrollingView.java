@@ -13,7 +13,9 @@ import android.widget.OverScroller;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-public class CustomScrollingView extends FrameLayout {
+import java.util.List;
+
+public abstract class CustomScrollingView<T extends ScrollPage> extends FrameLayout {
     private static final String TAG = CustomScrollingView.class.getName();
     /**
      * ID of the active pointer. This is used to retain consistency during
@@ -39,7 +41,9 @@ public class CustomScrollingView extends FrameLayout {
      */
     private int mLastMotionY;
 
-    protected boolean mInitializedObjects;
+    protected boolean mInitializedPages;
+
+    protected List<T> mPages;
 
     /**
      * True if the user is currently dragging this ScrollView around. This is
@@ -90,18 +94,35 @@ public class CustomScrollingView extends FrameLayout {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        if (!mInitializedObjects) {
-            initializeObjects();
+        if (!mInitializedPages) {
+            initializePages();
+        }
+    }
+
+    @Override
+    protected void onScrollChanged(int l, int t, int oldl, int oldt) {
+        super.onScrollChanged(l, t, oldl, oldt);
+        updatePageStates(t);
+    }
+
+    /**
+     * Update visibility of pages.
+     */
+    private void updatePageStates(int scrollY) {
+        if (mPages != null) {
+            for (int i = 0; i < mPages.size(); i++) {
+                T page = mPages.get(i);
+                page.setVisible(page.getYPosition() < scrollY + getMeasuredHeight());
+                page.setScrolledToTop(page.getYPosition() <= scrollY);
+            }
         }
     }
 
     /**
-     * This method is called after views have been measured. Once sizes are known, any user objects
-     * that depend on knowing the dimensions of the view can be initialized.
+     * This method is called after views have been measured. Once the measurements are known,
+     * the user can assign dimensions to the pages.
      */
-    public void initializeObjects() {
-
-    }
+    protected abstract void initializePages();
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
@@ -538,12 +559,12 @@ public class CustomScrollingView extends FrameLayout {
         mContentWidth = contentWidth;
     }
 
-    public boolean isInitializedObjects() {
-        return mInitializedObjects;
+    public boolean isInitializedPages() {
+        return mInitializedPages;
     }
 
-    public void setInitializedObjects(boolean initializedObjects) {
-        mInitializedObjects = initializedObjects;
+    public void setInitializedPages(boolean initializedPages) {
+        mInitializedPages = initializedPages;
     }
 
     public ScrollListener getListener() {
