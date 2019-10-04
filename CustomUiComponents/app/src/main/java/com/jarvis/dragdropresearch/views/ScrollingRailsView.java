@@ -17,10 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ScrollingRailsView extends CustomScrollingView<RailPage> {
-
-    private List<List<MovableObject>> mMovableObjectRails;
-    private List<ColorInterpolator> mColorInterpolators;
-
     private static final int[] COLORS_OBJECTS =
             new int[] {Color.RED, Color.GREEN, Color.BLUE, Color.YELLOW};
 
@@ -42,7 +38,6 @@ public class ScrollingRailsView extends CustomScrollingView<RailPage> {
 
     protected void initializePages() {
         setInitializedPages(true);
-        // TODO: Current positionObjects(getMeasuredWidth(), getMeasuredHeight());
         setupPages();
     }
 
@@ -82,38 +77,11 @@ public class ScrollingRailsView extends CustomScrollingView<RailPage> {
         }
     }
 
-    private void positionObjects(int viewWidth, int viewHeight) {
-        final int railCount = 3;
-        mMovableObjectRails = new ArrayList<>(railCount);
-
-        final int gapY = 100;
-        final int gapX = 200;
-
-        for (int g = 0; g < railCount; g++) {
-            ArrayList<MovableObject> rail = new ArrayList<>();
-
-            final int railY = (g + 1) * viewHeight - 100 * g;
-            final int railX = ((g == 0) ? gapX :
-                    ((g == railCount - 1) ? (viewWidth - gapX) :
-                            (gapX + viewWidth / railCount)));
-            for (int i = 0; i < 5; i++) {
-                int color = COLORS_OBJECTS[(i % COLORS_OBJECTS.length)];
-                rail.add(new MovableObject(railX, railY + gapY * i,
-                        "1", color));
-            }
-            mMovableObjectRails.add(rail);
-        }
-
-        setContentHeight(viewHeight * (2 + railCount) - (100 * railCount));
-        setContentWidth(viewWidth * 2);
-
-        mColorInterpolators = new ArrayList<>(railCount);
-
-        for (int i = 0; i < railCount; i++) {
-            ColorInterpolator interpolator = new ColorInterpolator(viewHeight);
-            interpolator.setColor(COLORS_BACKGROUNDS[i]);
-            mColorInterpolators.add(interpolator);
-        }
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        setupPages();
+        invalidate();
     }
 
     @Override
@@ -135,13 +103,6 @@ public class ScrollingRailsView extends CustomScrollingView<RailPage> {
     }
 
     @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        super.onSizeChanged(w, h, oldw, oldh);
-        positionObjects(w, h);
-        invalidate();
-    }
-
-    @Override
     protected void onScrollChanged(int l, int t, int oldl, int oldt) {
         super.onScrollChanged(l, t, oldl, oldt);
     }
@@ -152,7 +113,7 @@ public class ScrollingRailsView extends CustomScrollingView<RailPage> {
         final int offset = 25;
         final int radius = 50;
 
-        List<MovableObject> pageObjects =page.getMovableObjectRails();
+        List<MovableObject> pageObjects = page.getMovableObjectRails();
         Paint paint = new Paint();
 
         int count = 0;
