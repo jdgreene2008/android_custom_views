@@ -102,10 +102,6 @@ public class ScrollingRailsView extends CustomScrollingView<RailPage> {
         }
     }
 
-    @Override
-    protected void onScrollChanged(int l, int t, int oldl, int oldt) {
-        super.onScrollChanged(l, t, oldl, oldt);
-    }
 
     private void drawPageRail(RailPage page, Canvas canvas) {
         if (!page.isVisible()) return;
