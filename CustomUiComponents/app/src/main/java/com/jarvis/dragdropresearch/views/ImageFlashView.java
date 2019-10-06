@@ -1,18 +1,27 @@
 package com.jarvis.dragdropresearch.views;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
+import android.util.Log;
+
+import com.jarvis.dragdropresearch.R;
+import com.jarvis.dragdropresearch.utils.ImageCacheHelper;
+import com.jarvis.dragdropresearch.utils.ImageLoader;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Pictures flash in and out of view as the user scrolls.
  */
 public class ImageFlashView extends CustomScrollingView<ImagePage> {
+    private static final String TAG = ImageFlashView.class.getName();
+
     /**
      * Maximum number of images to cache.
      */
@@ -44,7 +53,44 @@ public class ImageFlashView extends CustomScrollingView<ImagePage> {
     protected void initializePages() {
         setInitializedPages(true);
         computeImageBounds();
+        prepareImages();
         setupPages();
+    }
+
+    private void prepareImages() {
+
+        ImageCacheHelper cache = ImageCacheHelper.getInstance();
+        cache.initCache();
+        ImageLoader loader = ImageLoader.getInstance();
+
+        ImageLoader.Configuration configuration = new ImageLoader.Configuration();
+        configuration.setCache(cache);
+        configuration.setMaxImageHeight(mMaxImageHeight);
+        configuration.setMaxImageWidth(mMaxImageWidth);
+
+        int[] images = new int[] {R.drawable.ic_pizza_cheese_multi, R.drawable.ic_pizza_pie_large};
+
+        loader.loadImages(getContext(), new ImageLoader.ImageLoadingCallbacks() {
+            @Override
+            public void onStatusUpdate(ImageLoader.LoadingStatus status) {
+                Log.d(TAG, "onStatusUpdated() called :: " + status);
+            }
+
+            @Override
+            public void onComplete(@Nullable ImageCacheHelper cache) {
+                Log.d(TAG, "Image Loading Complete");
+            }
+
+            @Override
+            public void onComplete(@Nullable List<Bitmap> images) {
+
+            }
+
+            @Override
+            public void onError(String error) {
+                Log.d(TAG, "onError() called with error :: " + error);
+            }
+        }, configuration, images);
     }
 
     private void computeImageBounds() {
