@@ -87,14 +87,14 @@ public class ImageLoader {
             }
             if (resourceDrawable == null || resourceDrawable.getBitmap() == null) continue;
 
-            Bitmap output = resourceDrawable.getBitmap();
+            options.inJustDecodeBounds = false;
+            Bitmap output = BitmapFactory
+                    .decodeStream(getBitmapInputStream(resourceDrawable.getBitmap()), null,
+                            options);
             if (output == null) {
                 mMarshaller.postError("Could not decode bitmap with id :: " + imgResId);
                 continue;
             }
-
-            // TODO: Figure out how to correctly load a scaled down version of bitmap from InputStream.
-            // It is currently throwing a null pointer exception.
 
             if (config.mCache != null) {
                 ImageCacheHelper cache = config.mCache;
