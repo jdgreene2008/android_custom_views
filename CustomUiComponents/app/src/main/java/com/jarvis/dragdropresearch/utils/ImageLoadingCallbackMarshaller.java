@@ -5,7 +5,7 @@ import android.graphics.Bitmap;
 import java.util.List;
 import java.util.concurrent.Executor;
 
-public class ImageLoadingCallbackMarshaller {
+class ImageLoadingCallbackMarshaller {
 
     private Executor mMainThreadExecutor;
     private ImageLoader.ImageLoadingCallbacks mImageLoadingCallbacks;
@@ -29,7 +29,7 @@ public class ImageLoadingCallbackMarshaller {
         }
     }
 
-    public void postError(final String error) {
+    void postError(final String error) {
         if (mImageLoadingCallbacks != null) {
             if (mMainThreadExecutor != null) {
                 mMainThreadExecutor.execute(new Runnable() {

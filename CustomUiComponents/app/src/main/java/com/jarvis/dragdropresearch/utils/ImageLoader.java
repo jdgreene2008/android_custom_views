@@ -89,7 +89,7 @@ public class ImageLoader {
 
             options.inJustDecodeBounds = false;
             Bitmap output = BitmapFactory
-                    .decodeStream(getBitmapInputStream(resourceDrawable.getBitmap()), null,
+                    .decodeStream(getBitmapInputStream(options, resourceDrawable.getBitmap()), null,
                             options);
             if (output == null) {
                 mMarshaller.postError("Could not decode bitmap with id :: " + imgResId);
@@ -144,11 +144,25 @@ public class ImageLoader {
         return inSampleSize;
     }
 
-    private InputStream getBitmapInputStream(Bitmap bitmap) {
+    private InputStream getBitmapInputStream(BitmapFactory.Options options,
+            Bitmap bitmap) {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.PNG, 0 /*ignored for PNG*/, bos);
+        bitmap.compress(getCompressionFormat(options), 100 /*ignored for PNG*/, bos);
         byte[] bitmapdata = bos.toByteArray();
         return new ByteArrayInputStream(bitmapdata);
+    }
+
+    @Nullable
+    private Bitmap.CompressFormat getCompressionFormat(BitmapFactory.Options options) {
+        if (options == null || options.outMimeType == null) return Bitmap.CompressFormat.JPEG;
+
+        if (options.outMimeType.endsWith("/png")) {
+            return Bitmap.CompressFormat.PNG;
+        } else if (options.outMimeType.endsWith("/webp")) {
+            return Bitmap.CompressFormat.WEBP;
+        } else {
+            return Bitmap.CompressFormat.JPEG;
+        }
     }
 
     /**
