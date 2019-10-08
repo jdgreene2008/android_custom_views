@@ -6,3 +6,6 @@ The source code presented here demonstrates ways to extend the Android View fram
 The below shows the CustomScrollingView.java custom UI component in action. The user scrolls up and down to reveal the circles. The primary purpose of this custom UI component is to serve as an intro to building customizable scrolling component outside of  the Android framework class of ScrollView.java. 
 
 ![CustomScrollingView](/images/3bwk2w.gif)
+
+![ImageFlashView](/images/image_flash_view.gif)
+
