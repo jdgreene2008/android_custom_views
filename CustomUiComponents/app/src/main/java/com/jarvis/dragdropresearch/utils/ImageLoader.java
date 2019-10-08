@@ -98,7 +98,7 @@ public class ImageLoader {
 
             if (config.mCache != null) {
                 ImageCacheHelper cache = config.mCache;
-                cache.addEntry(String.valueOf(imageResourcesIds), output);
+                cache.addEntry(String.valueOf(imageResourcesIds[i]), output);
             } else {
                 images.add(output);
             }

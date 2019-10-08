@@ -7,7 +7,6 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 
-import com.jarvis.dragdropresearch.rails.domain.ColorInterpolator;
 import com.jarvis.dragdropresearch.rails.domain.MovableObject;
 
 import androidx.annotation.Nullable;

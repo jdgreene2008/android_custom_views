@@ -1,11 +1,6 @@
-package com.jarvis.dragdropresearch.rails.domain;
+package com.jarvis.dragdropresearch.views;
 
-import android.graphics.Color;
-
-/**
- * Manages the background color for the drawing rails.
- */
-public class ColorInterpolator {
+public class Interpolator {
 
     private int mMaxValue;
 
@@ -13,9 +8,7 @@ public class ColorInterpolator {
 
     private float mInterpolatedValue;
 
-    private int mColor = Color.BLACK;
-
-    public ColorInterpolator(int maxValue) {
+    public Interpolator(int maxValue) {
         this.mMaxValue = maxValue;
     }
 
@@ -48,14 +41,6 @@ public class ColorInterpolator {
         } else {
             mInterpolatedValue = ((float)Math.abs(mValue) / (float)mMaxValue);
         }
-    }
-
-    public int getColor() {
-        return mColor;
-    }
-
-    public void setColor(int color) {
-        mColor = color;
     }
 
     public float getInterpolatedValue() {
