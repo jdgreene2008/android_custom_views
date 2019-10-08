@@ -31,7 +31,7 @@ public class ImageFlashView extends CustomScrollingView<ImagePage> {
     private static final int[] IMAGE_POOL =
             new int[] {R.drawable.ic_pizza_pie_large, R.drawable.ic_pizza_cheese_multi,
                     R.drawable.ic_pizza_jalapeno, R.drawable.ic_pizza_pepperoni,
-                    R.drawable.ic_pizza_pie_xlarge, R.drawable.ic_pizza_pie_medium,android.R.drawable.btn_star};
+                    R.drawable.ic_pizza_pie_xlarge, R.drawable.ic_pizza_pie_medium};
     private static final int[] COLORS_BACKGROUNDS =
             new int[] {Color.MAGENTA, Color.CYAN, Color.LTGRAY, Color.BLUE, Color.RED};
     /**
@@ -189,7 +189,9 @@ public class ImageFlashView extends CustomScrollingView<ImagePage> {
     }
 
     private void drawPageImage(ImagePage page, Canvas canvas) {
-        if (!page.isVisible()) return;
+        if (!page.isVisible()){
+            return;
+        }
 
         FlashImage image = page.getImage();
         if (!image.isImageAvailable()) return;

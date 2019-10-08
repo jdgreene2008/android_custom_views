@@ -112,7 +112,8 @@ public abstract class CustomScrollingView<T extends ScrollPage> extends FrameLay
         if (mPages != null) {
             for (int i = 0; i < mPages.size(); i++) {
                 T page = mPages.get(i);
-                page.setVisible(page.getYPosition() < scrollY + getMeasuredHeight());
+                page.setVisible(page.getYPosition() - getScrollY() < getMeasuredHeight()
+                        && getScrollY() <= page.getYPosition() + page.getHeight());
                 page.setScrolledToTop(page.getYPosition() <= scrollY);
             }
         }
