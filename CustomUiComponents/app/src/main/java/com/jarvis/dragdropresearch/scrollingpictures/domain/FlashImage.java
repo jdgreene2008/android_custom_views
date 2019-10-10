@@ -1,6 +1,6 @@
 package com.jarvis.dragdropresearch.scrollingpictures.domain;
 
-import com.jarvis.dragdropresearch.views.AlphaInterpolator;
+import com.jarvis.dragdropresearch.interpolators.AlphaInterpolator;
 import com.jarvis.dragdropresearch.views.ImagePage;
 
 import androidx.annotation.DrawableRes;

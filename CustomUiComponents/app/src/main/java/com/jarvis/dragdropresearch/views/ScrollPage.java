@@ -1,7 +1,7 @@
 package com.jarvis.dragdropresearch.views;
 
 /**
- * Describes a page of content that is used in conjunction with {@link CustomScrollingView}.
+ * Describes a page of content that is used in conjunction with {@link AbsCustomScrollingView}.
  */
 public class ScrollPage {
 
@@ -22,7 +22,7 @@ public class ScrollPage {
     }
 
     /**
-     * Set's the x position of the page relative to the parent {@link CustomScrollingView}
+     * Set's the x position of the page relative to the parent {@link AbsCustomScrollingView}
      * that is hosting it.
      *
      * @param xPosition
@@ -36,7 +36,7 @@ public class ScrollPage {
     }
 
     /**
-     * Set's the y position of the page relative to the parent {@link CustomScrollingView}
+     * Set's the y position of the page relative to the parent {@link AbsCustomScrollingView}
      * that is hosting it.
      *
      * @param yPosition
@@ -62,7 +62,7 @@ public class ScrollPage {
     }
 
     /**
-     * Returns true when the top of this page is visible in the {@link CustomScrollingView}.
+     * Returns true when the top of this page is visible in the {@link AbsCustomScrollingView}.
      */
     public boolean isVisible() {
         return mIsVisible;
@@ -74,7 +74,7 @@ public class ScrollPage {
 
     /**
      * @return True when this page has reached the upper limit of the visible portion of the {@link
-     * CustomScrollingView hosting it.}
+     * AbsCustomScrollingView hosting it.}
      */
     public boolean isScrolledToTop() {
         return mIsScrolledToTop;

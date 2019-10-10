@@ -15,8 +15,8 @@ import androidx.annotation.Nullable;
 
 import java.util.List;
 
-public abstract class CustomScrollingView<T extends ScrollPage> extends FrameLayout {
-    private static final String TAG = CustomScrollingView.class.getName();
+public abstract class AbsCustomScrollingView<T extends ScrollPage> extends FrameLayout {
+    private static final String TAG = AbsCustomScrollingView.class.getName();
     /**
      * ID of the active pointer. This is used to retain consistency during
      * drags/flings if multiple pointers are used.
@@ -62,18 +62,18 @@ public abstract class CustomScrollingView<T extends ScrollPage> extends FrameLay
     private int mOverscrollDistance;
     private int mOverflingDistance;
 
-    public CustomScrollingView(@NonNull Context context) {
+    public AbsCustomScrollingView(@NonNull Context context) {
         super(context);
         initGestureExperimentView();
     }
 
-    public CustomScrollingView(@NonNull Context context,
+    public AbsCustomScrollingView(@NonNull Context context,
             @Nullable AttributeSet attrs) {
         super(context, attrs);
         initGestureExperimentView();
     }
 
-    public CustomScrollingView(@NonNull Context context, @Nullable AttributeSet attrs,
+    public AbsCustomScrollingView(@NonNull Context context, @Nullable AttributeSet attrs,
             int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         initGestureExperimentView();

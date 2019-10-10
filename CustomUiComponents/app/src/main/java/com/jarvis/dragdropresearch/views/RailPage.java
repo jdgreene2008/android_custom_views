@@ -1,5 +1,6 @@
 package com.jarvis.dragdropresearch.views;
 
+import com.jarvis.dragdropresearch.interpolators.ColorInterpolator;
 import com.jarvis.dragdropresearch.rails.domain.MovableObject;
 
 import java.util.ArrayList;

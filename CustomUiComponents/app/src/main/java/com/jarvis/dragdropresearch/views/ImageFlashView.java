@@ -10,13 +10,14 @@ import android.util.AttributeSet;
 import android.util.Log;
 
 import com.jarvis.dragdropresearch.R;
+import com.jarvis.dragdropresearch.interpolators.AlphaInterpolator;
+import com.jarvis.dragdropresearch.interpolators.ColorInterpolator;
 import com.jarvis.dragdropresearch.scrollingpictures.domain.FlashImage;
 import com.jarvis.dragdropresearch.utils.ImageCacheHelper;
 import com.jarvis.dragdropresearch.utils.ImageLoader;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.graphics.ColorUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +26,7 @@ import java.util.Random;
 /**
  * Pictures flash in and out of view as the user scrolls.
  */
-public class ImageFlashView extends CustomScrollingView<ImagePage> {
+public class ImageFlashView extends AbsCustomScrollingView<ImagePage> {
     private static final String TAG = ImageFlashView.class.getName();
     private static final int PAGE_COUNT = 3;
     private static final int[] IMAGE_POOL =
@@ -208,7 +209,7 @@ public class ImageFlashView extends CustomScrollingView<ImagePage> {
 
         AlphaInterpolator interpolator = image.getAlphaInterpolator();
         interpolator.updateValue(interpolator.getMaxValue() - (page.getYPosition() - getScrollY()));
-        paint.setAlpha((int)(255 * interpolator.getInterpolatedValue()));
+        paint.setAlpha(interpolator.getInterpolatedAlpha());
 
         if (getScrollY() >= page.getYPosition() + image.getYOffset()) {
             // Means we've scrolled the current page to the top top of the visible part of the view.
@@ -241,11 +242,8 @@ public class ImageFlashView extends CustomScrollingView<ImagePage> {
         Rect shadeRect = new Rect(rectLeft, rectTop, rectRight, rectBottom);
 
         // Compute shade based on interpolation.
-        int shade = ColorUtils.setAlphaComponent(interpolator.getColor(),
-                (int)(interpolator.getInterpolatedValue() * 255));
-
         Paint paint = new Paint();
-        paint.setColor(shade);
+        paint.setColor(interpolator.getInterpolatedShade());
         paint.setStyle(Paint.Style.FILL);
         canvas.drawRect(shadeRect, paint);
     }

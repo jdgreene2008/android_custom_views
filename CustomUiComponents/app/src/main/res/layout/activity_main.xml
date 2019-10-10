@@ -8,7 +8,7 @@
     android:orientation="vertical"
     android:padding="@dimen/default_padding"
     tools:context=".activity.MainActivity">
-    <com.jarvis.dragdropresearch.views.ImageFlashView
+    <com.jarvis.dragdropresearch.views.ShapeFlashView
         android:id="@+id/gesture_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

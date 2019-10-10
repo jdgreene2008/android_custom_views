@@ -5,21 +5,21 @@ import android.widget.Toast;
 
 import com.jarvis.dragdropresearch.R;
 import com.jarvis.dragdropresearch.views.BuildableProductView;
-import com.jarvis.dragdropresearch.views.CustomScrollingView;
+import com.jarvis.dragdropresearch.views.AbsCustomScrollingView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
 
     private BuildableProductView mProductPanel;
-    private CustomScrollingView mGestureView;
+    private AbsCustomScrollingView mGestureView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mGestureView = findViewById(R.id.gesture_view);
-        mGestureView.setListener(new CustomScrollingView.ScrollListener() {
+        mGestureView.setListener(new AbsCustomScrollingView.ScrollListener() {
             @Override
             public void onDragStart() {
                 Toast.makeText(MainActivity.this, "Drag Started", Toast.LENGTH_SHORT).show();

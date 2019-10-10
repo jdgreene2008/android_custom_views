@@ -1,19 +1,24 @@
 package com.jarvis.dragdropresearch.views;
 
+import com.jarvis.dragdropresearch.funwithshapes.FlashShape;
 import com.jarvis.dragdropresearch.interpolators.ColorInterpolator;
-import com.jarvis.dragdropresearch.scrollingpictures.domain.FlashImage;
 
-public class ImagePage extends ScrollPage {
+/**
+ * Hosts various shapes.
+ * See {@link FlashShape.Type}
+ */
+public class FlashShapePage extends ScrollPage {
 
-  private FlashImage mImage;
-  private ColorInterpolator mBackgroundColorInterpolator;
+    private FlashShape mFlashShape;
 
-    public FlashImage getImage() {
-        return mImage;
+    private ColorInterpolator mBackgroundColorInterpolator;
+
+    public FlashShape getFlashShape() {
+        return mFlashShape;
     }
 
-    public void setImage(FlashImage image) {
-        mImage = image;
+    public void setFlashShape(FlashShape flashShape) {
+        mFlashShape = flashShape;
     }
 
     public ColorInterpolator getBackgroundColorInterpolator() {

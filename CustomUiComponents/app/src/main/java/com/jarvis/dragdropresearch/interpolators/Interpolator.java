@@ -1,4 +1,4 @@
-package com.jarvis.dragdropresearch.views;
+package com.jarvis.dragdropresearch.interpolators;
 
 public class Interpolator {
 

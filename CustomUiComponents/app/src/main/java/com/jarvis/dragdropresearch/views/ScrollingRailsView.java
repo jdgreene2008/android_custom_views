@@ -7,15 +7,15 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 
+import com.jarvis.dragdropresearch.interpolators.ColorInterpolator;
 import com.jarvis.dragdropresearch.rails.domain.MovableObject;
 
 import androidx.annotation.Nullable;
-import androidx.core.graphics.ColorUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ScrollingRailsView extends CustomScrollingView<RailPage> {
+public class ScrollingRailsView extends AbsCustomScrollingView<RailPage> {
     private static final int[] COLORS_OBJECTS =
             new int[] {Color.RED, Color.GREEN, Color.BLUE, Color.YELLOW};
 
@@ -101,7 +101,6 @@ public class ScrollingRailsView extends CustomScrollingView<RailPage> {
         }
     }
 
-
     private void drawPageRail(RailPage page, Canvas canvas) {
         if (!page.isVisible()) return;
 
@@ -151,11 +150,8 @@ public class ScrollingRailsView extends CustomScrollingView<RailPage> {
         Rect shadeRect = new Rect(rectLeft, rectTop, rectRight, rectBottom);
 
         // Compute shade based on interpolation.
-        int shade = ColorUtils.setAlphaComponent(interpolator.getColor(),
-                (int)(interpolator.getInterpolatedValue() * 255));
-
         Paint paint = new Paint();
-        paint.setColor(shade);
+        paint.setColor(interpolator.getInterpolatedShade());
         paint.setStyle(Paint.Style.FILL);
         canvas.drawRect(shadeRect, paint);
     }
