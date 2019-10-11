@@ -1,7 +1,6 @@
 package com.jarvis.dragdropresearch.funwithshapes;
 
 import com.jarvis.dragdropresearch.interpolators.AlphaInterpolator;
-import com.jarvis.dragdropresearch.interpolators.AngleInterpolator;
 import com.jarvis.dragdropresearch.interpolators.ColorInterpolator;
 
 public class FlashShape {
@@ -13,8 +12,6 @@ public class FlashShape {
     private int mYOffset;
 
     private ColorInterpolator mColorInterpolator;
-
-    private AngleInterpolator mAngleInterpolator;
 
     private AlphaInterpolator mAlphaInterpolator;
 
@@ -55,15 +52,6 @@ public class FlashShape {
         mColorInterpolator = colorInterpolator;
     }
 
-    public AngleInterpolator getAngleInterpolator() {
-        return mAngleInterpolator;
-    }
-
-    public void setAngleInterpolator(
-            AngleInterpolator angleInterpolator) {
-        mAngleInterpolator = angleInterpolator;
-    }
-
     public AlphaInterpolator getAlphaInterpolator() {
         return mAlphaInterpolator;
     }
@@ -75,6 +63,7 @@ public class FlashShape {
 
     public enum Type {
         ARC,
-        CIRCLE
+        CIRCLE,
+        TRIANGLE
     }
 }
