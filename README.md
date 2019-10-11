@@ -7,8 +7,20 @@ The below shows the CustomScrollingView.java custom UI component in action. The 
 
 ![ScrollingRailsView](/images/3bwk2w.gif)
 
+
+
 ![ImageFlashView](/images/image_flash_view.gif)
 
-![FlashShapesView](/images/flash_shapes_view.gif)
+
+
+![FlashShapesView-Arc closing](/images/flash_shapes_view.gif)
+
+
+
+![FlashShapesView-Similar triangles](/images/flash_shape_view_similar_triangles.gif)
+
+
+
+
 
 
