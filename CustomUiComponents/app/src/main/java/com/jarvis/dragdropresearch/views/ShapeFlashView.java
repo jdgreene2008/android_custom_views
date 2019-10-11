@@ -25,7 +25,7 @@ import java.util.Random;
 public class ShapeFlashView extends AbsCustomScrollingView<FlashShapePage> {
 
     private static final String TAG = ShapeFlashView.class.getName();
-    private static final int PAGE_COUNT = 3;
+    private static final int PAGE_COUNT = 8;
     private static final int[] COLORS_BACKGROUNDS =
             new int[] {Color.CYAN, Color.LTGRAY, Color.BLACK};
     private static final int[] SHAPE_COLORS = new int[] {Color.RED, Color.WHITE, Color.BLUE};
@@ -68,28 +68,50 @@ public class ShapeFlashView extends AbsCustomScrollingView<FlashShapePage> {
             page.setYPosition(i * getMeasuredHeight());
             mPages.add(page);
 
-            TriangleShape shape = new TriangleShape();
-            shape.setXOffset(getMeasuredWidth() / 2 - mMaxShapeWidth / 2);
-            shape.setYOffset(getMeasuredHeight() / 2 - mMaxShapeHeight / 2);
-            shape.setSymmetric(true);
+            FlashShape shape;
 
-            int triangleWidth = shape.isSymmetric() ? mMaxShapeWidth / 2 : mMaxShapeWidth;
-            TriangleInterpolator interpolator =
-                    new TriangleInterpolator(getMeasuredHeight(), mMaxShapeHeight, triangleWidth);
-            shape.setTriangleInterpolator(interpolator);
+            if (i % 2 == 0) {
+                shape = getArcShape();
+            } else {
+                shape = getTriangleShape();
+            }
 
             ColorInterpolator shapeColorInterpolator = new ColorInterpolator(getMeasuredHeight());
-            shapeColorInterpolator.setColor(SHAPE_COLORS[i - 1]);
+            shapeColorInterpolator.setColor(SHAPE_COLORS[(i - 1) % SHAPE_COLORS.length]);
             shape.setColorInterpolator(shapeColorInterpolator);
 
             page.setFlashShape(shape);
 
             ColorInterpolator pageBackgroundInterpolator = new ColorInterpolator(page.getHeight());
-            pageBackgroundInterpolator.setColor(COLORS_BACKGROUNDS[i - 1]);
+            pageBackgroundInterpolator.setColor(COLORS_BACKGROUNDS[(i - 1) % COLORS_BACKGROUNDS.length]);
             page.setBackgroundColorInterpolator(pageBackgroundInterpolator);
         }
 
         setContentHeight(getMeasuredHeight() * (PAGE_COUNT + 1));
+    }
+
+    private TriangleShape getTriangleShape() {
+        TriangleShape shape = new TriangleShape();
+        shape.setXOffset(getMeasuredWidth() / 2 - mMaxShapeWidth / 2);
+        shape.setYOffset(getMeasuredHeight() / 2 - mMaxShapeHeight / 2);
+        shape.setSymmetric(true);
+
+        int triangleWidth = shape.isSymmetric() ? mMaxShapeWidth / 2 : mMaxShapeWidth;
+        TriangleInterpolator interpolator =
+                new TriangleInterpolator(getMeasuredHeight(), mMaxShapeHeight, triangleWidth);
+        shape.setTriangleInterpolator(interpolator);
+        return shape;
+    }
+
+    private ArcShape getArcShape() {
+        ArcShape shape = new ArcShape();
+        shape.setXOffset(getMeasuredWidth() / 2 - mMaxShapeWidth / 2);
+        shape.setYOffset(getMeasuredHeight() / 2 - mMaxShapeHeight / 2);
+
+        AngleInterpolator angleInterpolator = new AngleInterpolator(getMeasuredHeight());
+        angleInterpolator.setMaxAngle(360.0f);
+        shape.setAngleInterpolator(angleInterpolator);
+        return shape;
     }
 
     @Override
@@ -243,10 +265,8 @@ public class ShapeFlashView extends AbsCustomScrollingView<FlashShapePage> {
             bottomLeftX = bounds.right - baseInterpolation;
             bottomLeftY = bounds.bottom;
 
-
             bottomRightX = bounds.right;
             bottomRightY = bounds.bottom;
-
 
             topX = bottomLeftX;
             topY = bottomRightY - altitudeInterpolation;
