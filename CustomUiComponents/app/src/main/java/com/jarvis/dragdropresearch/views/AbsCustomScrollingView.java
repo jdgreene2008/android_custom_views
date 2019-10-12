@@ -106,22 +106,33 @@ public abstract class AbsCustomScrollingView<T extends ScrollPage> extends Frame
     @Override
     protected void onScrollChanged(int l, int t, int oldl, int oldt) {
         super.onScrollChanged(l, t, oldl, oldt);
-        updatePageStates(t);
+        updatePageStates();
     }
 
     /**
      * Update visibility of pages.
      */
-    private void updatePageStates(int scrollY) {
+    private void updatePageStates() {
+        int upperBound = getContentUpperBound();
         if (mPages != null) {
             for (int i = 0; i < mPages.size(); i++) {
                 T page = mPages.get(i);
-                page.setVisible(page.getYPosition() - scrollY < (getMeasuredHeight() - getPaddingBottom())
-                        && getScrollY() <= (page.getYPosition() + page.getHeight() + getPaddingTop()));
 
-                page.setScrolledToTop(page.getYPosition() <= scrollY + getPaddingTop());
+                int lowerBound = upperBound + page.getHeight();
+
+                boolean pageInRange =
+                        page.getYPosition() <= lowerBound &&
+                                (page.getYPosition() + page.getHeight()) >= upperBound;
+
+                page.setVisible(pageInRange);
+
+                page.setScrolledToTop(page.getYPosition() <= upperBound);
             }
         }
+    }
+
+    protected int getContentUpperBound() {
+        return getScrollY() + getPaddingTop();
     }
 
     /**
