@@ -113,26 +113,38 @@ public abstract class AbsCustomScrollingView<T extends ScrollPage> extends Frame
      * Update visibility of pages.
      */
     private void updatePageStates() {
-        int upperBound = getContentUpperBound();
+        int contentBoundsTop = getContentBoundsTop();
+        int contentBoundsBottom = getContentBoundsBottom();
         if (mPages != null) {
             for (int i = 0; i < mPages.size(); i++) {
                 T page = mPages.get(i);
 
-                int lowerBound = upperBound + page.getHeight();
-
                 boolean pageInRange =
-                        page.getYPosition() <= lowerBound &&
-                                (page.getYPosition() + page.getHeight()) >= upperBound;
+                        page.getYPosition() <= contentBoundsBottom &&
+                                (page.getYPosition() + page.getHeight()) >= contentBoundsTop;
 
                 page.setVisible(pageInRange);
 
-                page.setScrolledToTop(page.getYPosition() <= upperBound);
+                page.setScrolledToTop(page.getYPosition() <= contentBoundsTop);
             }
         }
     }
 
-    protected int getContentUpperBound() {
+    protected int getContentBoundsTop() {
         return getScrollY() + getPaddingTop();
+    }
+
+    protected int getContentBoundsBottom() {
+        return getContentBoundsTop() + (getMeasuredHeight() - getPaddingTop() - getPaddingBottom());
+    }
+
+    /**
+     * @return Lower bound of the current page when the page top is currently scrolled to the top of the
+     * content window. This lower bound represents the position in the scroll view at which point the page
+     * ends
+     */
+    protected int getPageBoundsBottom(T page) {
+        return getContentBoundsTop() + page.getHeight();
     }
 
     /**
@@ -563,12 +575,11 @@ public abstract class AbsCustomScrollingView<T extends ScrollPage> extends Frame
     protected void drawShadedBackground(Canvas canvas, ColorInterpolator interpolator,
             ScrollPage page) {
         // Determine bounds of the shaded region.
-        int rectTop =
-                page.isScrolledToTop() ? (getScrollY() + getPaddingTop()) : page.getYPosition();
+        int rectTop = page.isScrolledToTop() ? getContentBoundsTop() : page.getYPosition();
         int rectLeft = getPaddingStart();
         int rectRight = getMeasuredWidth() - getPaddingEnd();
-        int rectBottom = page.isScrolledToTop() ? rectTop + page.getHeight() :
-                interpolator.getValue() + rectTop - getPaddingBottom();
+        int rectBottom = getContentBoundsBottom();
+
         Rect shadeRect = new Rect(rectLeft, rectTop, rectRight, rectBottom);
 
         // Compute shade based on interpolation.

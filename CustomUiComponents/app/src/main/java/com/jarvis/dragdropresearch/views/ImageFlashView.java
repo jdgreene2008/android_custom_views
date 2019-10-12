@@ -215,15 +215,14 @@ public class ImageFlashView extends AbsCustomScrollingView<ImagePage> {
         Paint paint = new Paint();
 
         AlphaInterpolator interpolator = image.getAlphaInterpolator();
-        interpolator.updateValue(interpolator.getMaxValue() -
-                (page.getYPosition() - getScrollY() - getPaddingTop() - getPaddingBottom()));
+        interpolator.updateValue(getContentBoundsBottom() - page.getYPosition());
         paint.setAlpha(interpolator.getInterpolatedAlpha());
 
-        if ((getScrollY() - getPaddingTop()) >= page.getYPosition() + image.getYOffset()) {
-            // Means we've scrolled the current page to the top top of the visible part of the view.
+        if (getContentBoundsTop() >= (page.getYPosition() + image.getYOffset())) {
+            // Means we've scrolled the current page to the top of the visible part of the image.
             canvas.drawBitmap(bm,
                     page.getXPosition() + image.getXOffset(),
-                    getScrollY() + +image.getYOffset() + getPaddingTop(), paint);
+                    getContentBoundsTop() + image.getYOffset(), paint);
         } else {
             canvas.drawBitmap(bm,
                     page.getXPosition() + image.getXOffset(),
@@ -235,9 +234,7 @@ public class ImageFlashView extends AbsCustomScrollingView<ImagePage> {
         if (page.isVisible()) {
             ColorInterpolator interpolator = page.getBackgroundColorInterpolator();
             interpolator
-                    .updateValue(interpolator.getMaxValue() -
-                            (page.getYPosition() - getScrollY() - getPaddingTop() -
-                                    getPaddingBottom()));
+                    .updateValue((getContentBoundsBottom() - page.getYPosition()));
             drawShadedBackground(canvas, interpolator, page);
         }
     }
