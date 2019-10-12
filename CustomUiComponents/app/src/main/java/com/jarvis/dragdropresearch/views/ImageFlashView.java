@@ -43,12 +43,11 @@ public class ImageFlashView extends AbsCustomScrollingView<ImagePage> {
     /**
      * Image page padding in pixels.
      */
-    private static final int IMAGE_PAGE_PADDING = 20;
+    private static final int PADDING = 50;
 
     private int mMaxImageWidth;
     private int mMaxImageHeight;
 
-    private ImageLoader.LoadingStatus mLoadingStatus;
     private ImageCacheHelper mImageCache;
 
     public ImageFlashView(@NonNull Context context) {
@@ -74,8 +73,8 @@ public class ImageFlashView extends AbsCustomScrollingView<ImagePage> {
     }
 
     private void computeImageBounds() {
-        mMaxImageHeight = getMeasuredHeight() - 2 * IMAGE_PAGE_PADDING;
-        mMaxImageWidth = getMeasuredWidth() - 2 * IMAGE_PAGE_PADDING;
+        mMaxImageHeight = getMeasuredHeight() - 2 * PADDING;
+        mMaxImageWidth = getMeasuredWidth() - 2 * PADDING;
     }
 
     private void setupPages() {
@@ -122,7 +121,6 @@ public class ImageFlashView extends AbsCustomScrollingView<ImagePage> {
             @Override
             public void onStatusUpdate(ImageLoader.LoadingStatus status) {
                 Log.d(TAG, "onStatusUpdated() called :: " + status);
-                mLoadingStatus = status;
             }
 
             @Override
@@ -141,7 +139,7 @@ public class ImageFlashView extends AbsCustomScrollingView<ImagePage> {
                             int imgHeight = bm.getHeight();
                             int imgWidth = bm.getWidth();
 
-                            int imgTop = getMeasuredHeight() / 2 - imgHeight / 2;
+                            int imgTop =  getMeasuredHeight() / 2 - imgHeight / 2;
                             int imgLeft = getMeasuredWidth() / 2 - imgWidth / 2;
 
                             image.setXOffset(imgLeft);
