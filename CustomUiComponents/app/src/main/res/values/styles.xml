@@ -9,4 +9,9 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="StyledButton"
+        parent="Widget.AppCompat.Button">
+        <item name="android:background">@drawable/bg_button</item>
+    </style>
+
 </resources>
