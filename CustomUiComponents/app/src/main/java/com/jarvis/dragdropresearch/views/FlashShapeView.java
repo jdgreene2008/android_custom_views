@@ -10,9 +10,11 @@ import android.util.AttributeSet;
 
 import com.jarvis.dragdropresearch.funwithshapes.ArcShape;
 import com.jarvis.dragdropresearch.funwithshapes.FlashShape;
+import com.jarvis.dragdropresearch.funwithshapes.RectangleShape;
 import com.jarvis.dragdropresearch.funwithshapes.TriangleShape;
 import com.jarvis.dragdropresearch.interpolators.AngleInterpolator;
 import com.jarvis.dragdropresearch.interpolators.ColorInterpolator;
+import com.jarvis.dragdropresearch.interpolators.RectangleInterpolator;
 import com.jarvis.dragdropresearch.interpolators.TriangleInterpolator;
 
 import androidx.annotation.NonNull;
@@ -24,7 +26,7 @@ import java.util.Random;
 public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
 
     private static final String TAG = FlashShapeView.class.getName();
-    private static final int PAGE_COUNT = 25;
+    private static final int PAGE_COUNT = 30;
     private static final int[] COLORS_BACKGROUNDS =
             new int[] {Color.CYAN, Color.LTGRAY, Color.BLACK};
     private static final int[] SHAPE_COLORS =
@@ -80,10 +82,12 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
 
             FlashShape shape;
 
-            if (i % 2 == 0) {
+            if (i % 3 == 0) {
                 shape = getArcShape(page);
-            } else {
+            } else if (i % 3 == 1) {
                 shape = getTriangleShape(page);
+            } else {
+                shape = getRectangleShape(page);
             }
 
             ColorInterpolator shapeColorInterpolator = new ColorInterpolator(page.getHeight());
@@ -113,6 +117,20 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
                 new TriangleInterpolator(page.getHeight(), mMaxShapeHeight, mMaxShapeWidth,
                         random.nextInt(500) % 10 < 5);
         shape.setTriangleInterpolator(interpolator);
+        return shape;
+    }
+
+    private RectangleShape getRectangleShape(FlashShapePage page) {
+        Random random = new Random();
+        RectangleShape shape = new RectangleShape();
+        shape.setXOffset((int)(page.getWidth() / 2 -
+                mMaxShapeWidth / 2));
+        shape.setYOffset((int)(page.getHeight() / 2 - mMaxShapeHeight / 2));
+
+        RectangleInterpolator interpolator =
+                new RectangleInterpolator(page.getHeight(), mMaxShapeHeight, mMaxShapeWidth,
+                        random.nextInt(500) % 10 < 5);
+        shape.setRectangleInterpolator(interpolator);
         return shape;
     }
 
@@ -158,6 +176,8 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
             drawArcShape(canvas, page);
         } else if (shape instanceof TriangleShape) {
             drawTriangleShape(canvas, page);
+        } else if (shape instanceof RectangleShape) {
+            drawRectangleShape(canvas, page);
         }
     }
 
@@ -199,6 +219,97 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
             paint.setColor(colorInterpolator.getInterpolatedShade());
 
             canvas.drawArc(ovalBounds, 0, angleInterpolator.getInterpolatedAngle(), true, paint);
+        }
+    }
+
+    private void drawRectangleShape(Canvas canvas, FlashShapePage page) {
+        RectangleShape shape = (RectangleShape)page.getFlashShape();
+
+        Paint paint = new Paint();
+        paint.setStyle(Paint.Style.FILL);
+        ColorInterpolator colorInterpolator = shape.getColorInterpolator();
+        RectangleInterpolator rectangleInterpolator = shape.getRectangleInterpolator();
+
+        if (pageShapeScrolledToTop(page, shape)) {
+            // Means we've scrolled the current page to the top top of the visible part of the view.
+            // Only drawing arcs for now
+
+            // Draw the arc
+            float boundingRectTop = getScrollY() + shape.getYOffset() + getPaddingTop();
+            float boundingRectLeft = page.getXPosition() + shape.getXOffset();
+            float boundingRectRight = boundingRectLeft + mMaxShapeWidth;
+            float boundingRectBottom = boundingRectTop + mMaxShapeHeight;
+
+            RectF bounds = new RectF(boundingRectLeft, boundingRectTop, boundingRectRight,
+                    boundingRectBottom);
+            paint.setColor(colorInterpolator.getInterpolatedShade());
+
+            drawRectangleShape(canvas, bounds, rectangleInterpolator, paint);
+        } else {
+            colorInterpolator.updateValue(getContentBoundsBottom() - page.getYPosition());
+            rectangleInterpolator.updateValue(getContentBoundsBottom() - page.getYPosition());
+
+            // Draw the arc
+            float boundingRectTop = page.getYPosition() + shape.getYOffset() + getPaddingTop();
+            float boundingRectLeft = page.getXPosition() + shape.getXOffset();
+            float boundingRectRight = boundingRectLeft + mMaxShapeWidth;
+            float boundingRectBottom = boundingRectTop + mMaxShapeHeight;
+
+            RectF bounds = new RectF(boundingRectLeft, boundingRectTop, boundingRectRight,
+                    boundingRectBottom);
+            paint.setColor(colorInterpolator.getInterpolatedShade());
+
+            drawRectangleShape(canvas, bounds, rectangleInterpolator, paint);
+        }
+    }
+
+    private void drawRectangleShape(Canvas canvas, RectF bounds,
+            RectangleInterpolator interpolator, Paint paint) {
+        float[] interpolatedDimensions = interpolator.getInterpolatedDimensions();
+        float interpolatedWidth =
+                interpolatedDimensions[RectangleInterpolator.INTERPOLATION_VALUES_WIDTH];
+        float interpolatedHeight =
+                interpolatedDimensions[RectangleInterpolator.INTERPOLATION_VALUES_HEIGHT];
+
+        if (!interpolator.isSymmetric()) {
+            float top = bounds.bottom - interpolatedHeight;
+            float bottom = bounds.bottom;
+            float left = bounds.left;
+            float right = left + interpolatedWidth;
+
+            canvas.drawRect(left, top, right, bottom, paint);
+        } else {
+            // Bottom Left Rectangle
+            float top = bounds.bottom - interpolatedHeight;
+            float bottom = bounds.bottom;
+            float left = bounds.left;
+            float right = left + interpolatedWidth;
+
+            canvas.drawRect(left, top, right, bottom, paint);
+
+            // Bottom Right Rectangle
+            top = bounds.bottom - interpolatedHeight;
+            bottom = bounds.bottom;
+            left = bounds.right - interpolatedWidth;
+            right = bounds.right;
+
+            canvas.drawRect(left, top, right, bottom, paint);
+
+            // Top Left Rectangle
+            top = bounds.top;
+            bottom = bounds.top + interpolatedHeight;
+            left = bounds.left;
+            right = bounds.left + interpolatedWidth;
+
+            canvas.drawRect(left, top, right, bottom, paint);
+
+            // Top Right Rectangle
+            top = bounds.top;
+            bottom = bounds.top + interpolatedHeight;
+            left = bounds.right - interpolatedWidth;
+            right = bounds.right;
+
+            canvas.drawRect(left, top, right, bottom, paint);
         }
     }
 
