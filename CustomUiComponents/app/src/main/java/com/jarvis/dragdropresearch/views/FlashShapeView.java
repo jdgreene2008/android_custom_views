@@ -21,9 +21,9 @@ import androidx.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class ShapeFlashView extends AbsCustomScrollingView<FlashShapePage> {
+public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
 
-    private static final String TAG = ShapeFlashView.class.getName();
+    private static final String TAG = FlashShapeView.class.getName();
     private static final int PAGE_COUNT = 25;
     private static final int[] COLORS_BACKGROUNDS =
             new int[] {Color.CYAN, Color.LTGRAY, Color.BLACK};
@@ -34,16 +34,16 @@ public class ShapeFlashView extends AbsCustomScrollingView<FlashShapePage> {
     private float mMaxShapeWidth;
     private float mMaxShapeHeight;
 
-    public ShapeFlashView(@NonNull Context context) {
+    public FlashShapeView(@NonNull Context context) {
         super(context);
     }
 
-    public ShapeFlashView(@NonNull Context context,
+    public FlashShapeView(@NonNull Context context,
             @Nullable AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public ShapeFlashView(@NonNull Context context, @Nullable AttributeSet attrs,
+    public FlashShapeView(@NonNull Context context, @Nullable AttributeSet attrs,
             int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
