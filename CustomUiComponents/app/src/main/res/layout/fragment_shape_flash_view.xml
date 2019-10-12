@@ -3,11 +3,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="@dimen/default_padding"
+    android:gravity="center"
     android:orientation="vertical">
     <com.jarvis.dragdropresearch.views.ShapeFlashView
         android:id="@+id/gesture_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="300dp"
+        android:layout_height="250dp"
         android:padding="2dp"
         android:background="@drawable/bg_gesture_practice" />
 </LinearLayout>

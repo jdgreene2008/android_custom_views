@@ -24,10 +24,11 @@ import java.util.Random;
 public class ShapeFlashView extends AbsCustomScrollingView<FlashShapePage> {
 
     private static final String TAG = ShapeFlashView.class.getName();
-    private static final int PAGE_COUNT = 8;
+    private static final int PAGE_COUNT = 25;
     private static final int[] COLORS_BACKGROUNDS =
             new int[] {Color.CYAN, Color.LTGRAY, Color.BLACK};
-    private static final int[] SHAPE_COLORS = new int[] {Color.RED, Color.WHITE, Color.BLUE};
+    private static final int[] SHAPE_COLORS = new int[] {Color.RED, Color.WHITE, Color.BLUE,Color.GREEN,
+            Color.YELLOW};
 
     private float mMaxShapeWidth;
     private float mMaxShapeHeight;
@@ -101,11 +102,12 @@ public class ShapeFlashView extends AbsCustomScrollingView<FlashShapePage> {
     }
 
     private TriangleShape getTriangleShape(FlashShapePage page) {
+        Random random = new Random();
         TriangleShape shape = new TriangleShape();
         shape.setXOffset((int)(page.getWidth() / 2 -
                 mMaxShapeWidth / 2));
         shape.setYOffset((int)(page.getHeight() / 2 - mMaxShapeHeight / 2));
-        shape.setSymmetric(true);
+        shape.setSymmetric(random.nextInt(500) % 10 < 5);
 
         float triangleWidth = shape.isSymmetric() ? (mMaxShapeWidth / 2) : mMaxShapeWidth;
         TriangleInterpolator interpolator =
@@ -240,7 +242,7 @@ public class ShapeFlashView extends AbsCustomScrollingView<FlashShapePage> {
     }
 
     private void drawTriangleShape(Canvas canvas, RectF bounds,
-            TriangleInterpolator triangleInterpolator, TriangleShape shape, Paint paint) {
+            TriangleInterpolator triangleInterpolator, TriangleShape triangle, Paint paint) {
         float baseInterpolation = triangleInterpolator
                 .getInterpolatedValues()[TriangleInterpolator.INTERPOLATION_VALUES_BASE];
         float altitudeInterpolation = triangleInterpolator
@@ -267,7 +269,7 @@ public class ShapeFlashView extends AbsCustomScrollingView<FlashShapePage> {
 
         canvas.drawPath(leftTriangle, paint);
 
-        if (shape.isSymmetric()) {
+        if (triangle.isSymmetric()) {
             // Construct right triangle.
             bottomLeftX = bounds.right - baseInterpolation;
             bottomLeftY = bounds.bottom;
