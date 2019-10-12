@@ -14,6 +14,8 @@ public class TriangleInterpolator extends Interpolator {
 
     private float[] mInterpolatedValues = new float[2];
 
+    private boolean mSymmetric;
+
     /**
      * Create a new triangle interpolator.
      *
@@ -24,9 +26,26 @@ public class TriangleInterpolator extends Interpolator {
      * 1 will be used.
      */
     public TriangleInterpolator(int maxValue, float altitude, float base) {
+        this(maxValue, altitude, base, false);
+    }
+
+    /**
+     * Create a new triangle interpolator.
+     *
+     * @param maxValue Max value for the units upon which the interpolation fraction will be calculated.
+     * @param altitude Max altitude for the triangle. Should be greater than 0. If not, a value of 1
+     * will be used.
+     * @param base Max value for the base of the triangle. Should be greater than 0. If not, a value of
+     * 1 will be used.
+     * @param symmetric True if this triangle should be drawn as two triangles joining into one.
+     * When true, the base will be halved and the interpolation will be based on the halved base.
+     */
+    public TriangleInterpolator(int maxValue, float altitude, float base, boolean symmetric) {
         super(maxValue);
         mBase = base > 0 ? base : 1;
+        mBase = symmetric ? base / 2 : base;
         mAltitude = altitude > 0 ? altitude : 1;
+        mSymmetric = symmetric;
     }
 
     public float getBase() {
@@ -59,6 +78,27 @@ public class TriangleInterpolator extends Interpolator {
      */
     public void setInterpolateOnAltitude(boolean interpolateOnAltitude) {
         mInterpolateOnAltitude = interpolateOnAltitude;
+    }
+
+    public boolean isSymmetric() {
+        return mSymmetric;
+    }
+
+    /**
+     * @param symmetric Set to true if the triangle should be drawn as two triangles formed into
+     * one. In that scenario, the base is halved and the interpolation is calculated based on
+     * the new base.
+     */
+    public void setSymmetric(boolean symmetric) {
+        if (symmetric == mSymmetric) return;
+
+        if (symmetric) {
+            mBase = mBase / 2;
+        } else {
+            mBase = 2 * mBase;
+        }
+
+        mSymmetric = symmetric;
     }
 
     public float[] getInterpolatedValues() {

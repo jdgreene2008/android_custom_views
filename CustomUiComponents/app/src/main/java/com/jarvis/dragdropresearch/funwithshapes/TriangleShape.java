@@ -8,8 +8,6 @@ public class TriangleShape extends FlashShape {
 
     private int mAltitude;
 
-    private boolean mSymmetric;
-
     private TriangleInterpolator mTriangleInterpolator;
 
     public TriangleShape() {
@@ -30,20 +28,6 @@ public class TriangleShape extends FlashShape {
 
     public void setAltitude(int altitude) {
         mAltitude = altitude;
-    }
-
-    /**
-     * @return True if a corresponding triangle that mirrors this triangle should be drawn. If this
-     * is true, one triangle will be drawn at the X start coordinate of the base and the
-     * other triangle will be drawn at the X end coordinate of the base. The base for each triangle
-     * will be 1/2 the value passed into {@link TriangleShape#setBase(int)}.
-     */
-    public boolean isSymmetric() {
-        return mSymmetric;
-    }
-
-    public void setSymmetric(boolean symmetric) {
-        mSymmetric = symmetric;
     }
 
     public TriangleInterpolator getTriangleInterpolator() {

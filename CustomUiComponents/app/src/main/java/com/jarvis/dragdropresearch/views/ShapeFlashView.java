@@ -27,8 +27,9 @@ public class ShapeFlashView extends AbsCustomScrollingView<FlashShapePage> {
     private static final int PAGE_COUNT = 25;
     private static final int[] COLORS_BACKGROUNDS =
             new int[] {Color.CYAN, Color.LTGRAY, Color.BLACK};
-    private static final int[] SHAPE_COLORS = new int[] {Color.RED, Color.WHITE, Color.BLUE,Color.GREEN,
-            Color.YELLOW};
+    private static final int[] SHAPE_COLORS =
+            new int[] {Color.RED, Color.WHITE, Color.BLUE, Color.GREEN,
+                    Color.YELLOW};
 
     private float mMaxShapeWidth;
     private float mMaxShapeHeight;
@@ -107,11 +108,10 @@ public class ShapeFlashView extends AbsCustomScrollingView<FlashShapePage> {
         shape.setXOffset((int)(page.getWidth() / 2 -
                 mMaxShapeWidth / 2));
         shape.setYOffset((int)(page.getHeight() / 2 - mMaxShapeHeight / 2));
-        shape.setSymmetric(random.nextInt(500) % 10 < 5);
 
-        float triangleWidth = shape.isSymmetric() ? (mMaxShapeWidth / 2) : mMaxShapeWidth;
         TriangleInterpolator interpolator =
-                new TriangleInterpolator(page.getHeight(), mMaxShapeHeight, triangleWidth);
+                new TriangleInterpolator(page.getHeight(), mMaxShapeHeight, mMaxShapeWidth,
+                        random.nextInt(500) % 10 < 5);
         shape.setTriangleInterpolator(interpolator);
         return shape;
     }
@@ -269,7 +269,7 @@ public class ShapeFlashView extends AbsCustomScrollingView<FlashShapePage> {
 
         canvas.drawPath(leftTriangle, paint);
 
-        if (triangle.isSymmetric()) {
+        if (triangleInterpolator.isSymmetric()) {
             // Construct right triangle.
             bottomLeftX = bounds.right - baseInterpolation;
             bottomLeftY = bounds.bottom;
