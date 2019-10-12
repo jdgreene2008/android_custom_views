@@ -3,6 +3,6 @@
     <dimen name="default_padding">10dp</dimen>
 
     <!-- Buttons -->
-    <dimen name="button_width_default">200dp</dimen>
+    <dimen name="button_width_default">300dp</dimen>
     <dimen name="button_padding">4dp</dimen>
 </resources>

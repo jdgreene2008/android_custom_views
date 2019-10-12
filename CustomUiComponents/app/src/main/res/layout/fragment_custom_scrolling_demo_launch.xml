@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
     android:padding="@dimen/default_padding">
 
     <androidx.constraintlayout.widget.Guideline
@@ -30,17 +31,21 @@
         android:layout_height="wrap_content"
         android:padding="@dimen/default_padding"
         android:text="@string/btn_launch_scrolling_rails"
+        android:textStyle="bold"
         app:layout_constraintEnd_toStartOf="@+id/guideline_right_vertical"
         app:layout_constraintStart_toStartOf="@+id/guideline_left_vertical"
-        android:layout_marginBottom="10dp"
+        android:layout_marginBottom="20dp"
+        tools:textSize="20sp"
         app:layout_constraintTop_toBottomOf="@+id/guideline_top_horizontal" />
     <Button android:id="@+id/btn_launch_image_flash_view"
         style="@style/StyledButton"
         android:layout_width="@dimen/button_width_default"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="20dp"
         android:padding="@dimen/default_padding"
+        android:textStyle="bold"
         android:text="@string/btn_launch_image_flash"
+        tools:textSize="20sp"
         app:layout_constraintEnd_toStartOf="@id/guideline_right_vertical"
         app:layout_constraintStart_toStartOf="@id/guideline_left_vertical"
         app:layout_constraintTop_toBottomOf="@+id/btn_launch_scrolling_rails" />
@@ -48,9 +53,11 @@
         style="@style/StyledButton"
         android:layout_width="@dimen/button_width_default"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="20dp"
+        android:textStyle="bold"
         android:padding="@dimen/default_padding"
         android:text="@string/btn_launch_shape_flash"
+        tools:textSize="20sp"
         app:layout_constraintEnd_toStartOf="@id/guideline_right_vertical"
         app:layout_constraintStart_toStartOf="@id/guideline_left_vertical"
         app:layout_constraintTop_toBottomOf="@id/btn_launch_image_flash_view" />
