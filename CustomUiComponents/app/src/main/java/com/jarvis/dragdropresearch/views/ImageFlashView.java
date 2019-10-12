@@ -5,7 +5,6 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
 
@@ -88,12 +87,14 @@ public class ImageFlashView extends AbsCustomScrollingView<ImagePage> {
             page.setHeight(getMeasuredHeight() - (getPaddingTop() + getPaddingBottom()));
             page.setWidth(getMeasuredWidth() - (getPaddingStart() + getPaddingEnd()));
             page.setXPosition(getPaddingStart());
+
             if (startPosition == 0) {
                 startPosition = i * (getMeasuredHeight() - getPaddingBottom());
             } else {
                 startPosition += page.getHeight();
             }
             page.setYPosition(startPosition);
+
             mPages.add(page);
 
             ColorInterpolator interpolator = new ColorInterpolator(page.getHeight());
@@ -239,23 +240,5 @@ public class ImageFlashView extends AbsCustomScrollingView<ImagePage> {
                                     getPaddingBottom()));
             drawShadedBackground(canvas, interpolator, page);
         }
-    }
-
-    private void drawShadedBackground(Canvas canvas, ColorInterpolator interpolator,
-            ImagePage page) {
-        // Determine bounds of the shaded region.
-        int rectTop =
-                page.isScrolledToTop() ? (getScrollY() + getPaddingTop()) : page.getYPosition();
-        int rectLeft = getPaddingStart();
-        int rectRight = getMeasuredWidth() - getPaddingEnd();
-        int rectBottom = page.isScrolledToTop() ? rectTop + page.getHeight() :
-                interpolator.getValue() + rectTop - getPaddingBottom();
-        Rect shadeRect = new Rect(rectLeft, rectTop, rectRight, rectBottom);
-
-        // Compute shade based on interpolation.
-        Paint paint = new Paint();
-        paint.setColor(interpolator.getInterpolatedShade());
-        paint.setStyle(Paint.Style.FILL);
-        canvas.drawRect(shadeRect, paint);
     }
 }

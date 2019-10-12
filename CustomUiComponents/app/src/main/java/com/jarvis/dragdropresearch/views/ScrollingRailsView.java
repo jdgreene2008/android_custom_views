@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Rect;
 import android.util.AttributeSet;
 
 import com.jarvis.dragdropresearch.interpolators.ColorInterpolator;
@@ -135,23 +134,7 @@ public class ScrollingRailsView extends AbsCustomScrollingView<RailPage> {
             ColorInterpolator interpolator = page.getColorInterpolator();
             interpolator
                     .updateValue(interpolator.getMaxValue() - (page.getYPosition() - getScrollY()));
-            drawShadedBackground(canvas, interpolator, page.getYPosition());
+            drawShadedBackground(canvas, interpolator, page);
         }
-    }
-
-    private void drawShadedBackground(Canvas canvas, ColorInterpolator interpolator,
-            int yPosition) {
-        // Determine bounds of the shaded region.
-        int rectTop = yPosition;
-        int rectLeft = 0;
-        int rectRight = getMeasuredWidth();
-        int rectBottom = interpolator.getValue() + rectTop + 50;
-        Rect shadeRect = new Rect(rectLeft, rectTop, rectRight, rectBottom);
-
-        // Compute shade based on interpolation.
-        Paint paint = new Paint();
-        paint.setColor(interpolator.getInterpolatedShade());
-        paint.setStyle(Paint.Style.FILL);
-        canvas.drawRect(shadeRect, paint);
     }
 }

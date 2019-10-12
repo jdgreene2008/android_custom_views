@@ -4,9 +4,9 @@ public class TriangleInterpolator extends Interpolator {
     public static final int INTERPOLATION_VALUES_BASE = 0;
     public static final int INTERPOLATION_VALUES_ALTITUDE = 1;
 
-    private int mBase;
+    private float mBase;
 
-    private int mAltitude;
+    private float mAltitude;
 
     private boolean mInterpolateOnAltitude = true;
 
@@ -23,13 +23,13 @@ public class TriangleInterpolator extends Interpolator {
      * @param base Max value for the base of the triangle. Should be greater than 0. If not, a value of
      * 1 will be used.
      */
-    public TriangleInterpolator(int maxValue, int altitude, int base) {
+    public TriangleInterpolator(int maxValue, float altitude, float base) {
         super(maxValue);
         mBase = base > 0 ? base : 1;
         mAltitude = altitude > 0 ? altitude : 1;
     }
 
-    public int getBase() {
+    public float getBase() {
         return mBase;
     }
 
@@ -37,7 +37,7 @@ public class TriangleInterpolator extends Interpolator {
         mBase = base;
     }
 
-    public int getAltitude() {
+    public float getAltitude() {
         return mAltitude;
     }
 

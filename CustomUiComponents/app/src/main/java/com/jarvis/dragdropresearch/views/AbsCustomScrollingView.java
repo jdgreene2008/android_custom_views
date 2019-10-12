@@ -2,6 +2,8 @@ package com.jarvis.dragdropresearch.views;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
@@ -9,6 +11,8 @@ import android.view.ViewConfiguration;
 import android.view.ViewParent;
 import android.widget.FrameLayout;
 import android.widget.OverScroller;
+
+import com.jarvis.dragdropresearch.interpolators.ColorInterpolator;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -543,6 +547,24 @@ public abstract class AbsCustomScrollingView<T extends ScrollPage> extends Frame
                 mListener.onDragEnd();
             }
         }
+    }
+
+    protected void drawShadedBackground(Canvas canvas, ColorInterpolator interpolator,
+            ScrollPage page) {
+        // Determine bounds of the shaded region.
+        int rectTop =
+                page.isScrolledToTop() ? (getScrollY() + getPaddingTop()) : page.getYPosition();
+        int rectLeft = getPaddingStart();
+        int rectRight = getMeasuredWidth() - getPaddingEnd();
+        int rectBottom = page.isScrolledToTop() ? rectTop + page.getHeight() :
+                interpolator.getValue() + rectTop - getPaddingBottom();
+        Rect shadeRect = new Rect(rectLeft, rectTop, rectRight, rectBottom);
+
+        // Compute shade based on interpolation.
+        Paint paint = new Paint();
+        paint.setColor(interpolator.getInterpolatedShade());
+        paint.setStyle(Paint.Style.FILL);
+        canvas.drawRect(shadeRect, paint);
     }
 
     public int getContentHeight() {

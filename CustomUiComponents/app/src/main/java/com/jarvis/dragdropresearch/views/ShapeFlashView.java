@@ -5,7 +5,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.AttributeSet;
 
@@ -30,8 +29,8 @@ public class ShapeFlashView extends AbsCustomScrollingView<FlashShapePage> {
             new int[] {Color.CYAN, Color.LTGRAY, Color.BLACK};
     private static final int[] SHAPE_COLORS = new int[] {Color.RED, Color.WHITE, Color.BLUE};
 
-    private int mMaxShapeWidth;
-    private int mMaxShapeHeight;
+    private float mMaxShapeWidth;
+    private float mMaxShapeHeight;
 
     public ShapeFlashView(@NonNull Context context) {
         super(context);
@@ -55,60 +54,73 @@ public class ShapeFlashView extends AbsCustomScrollingView<FlashShapePage> {
 
     private void setupPages() {
         mPages = new ArrayList<>(PAGE_COUNT);
-        mMaxShapeHeight = getMeasuredWidth() / 2;
-        mMaxShapeWidth = getMeasuredWidth() / 2;
+        mMaxShapeHeight = (getMeasuredHeight() - getPaddingTop() - getPaddingBottom()) / 2;
+        mMaxShapeWidth = (getMeasuredWidth() - getPaddingStart() - getPaddingEnd()) / 2;
 
         // Assumes fixed-size pages for now.
         final Random random = new Random(System.currentTimeMillis());
+        int startPosition = 0;
         for (int i = 1; i <= PAGE_COUNT; i++) {
             FlashShapePage page = new FlashShapePage();
-            page.setHeight(getMeasuredHeight());
-            page.setWidth(getMeasuredWidth());
-            page.setXPosition(0);
-            page.setYPosition(i * getMeasuredHeight());
+            page.setHeight(getMeasuredHeight() - (getPaddingTop() + getPaddingBottom()));
+            page.setWidth(getMeasuredWidth() - (getPaddingStart() + getPaddingEnd()));
+            page.setXPosition(getPaddingStart());
+
+            if (startPosition == 0) {
+                startPosition = i * (getMeasuredHeight() - getPaddingBottom());
+            } else {
+                startPosition += page.getHeight();
+            }
+            page.setYPosition(startPosition);
+
+            mPages.add(page);
             mPages.add(page);
 
             FlashShape shape;
 
             if (i % 2 == 0) {
-                shape = getArcShape();
+                shape = getArcShape(page);
             } else {
-                shape = getTriangleShape();
+                shape = getTriangleShape(page);
             }
 
-            ColorInterpolator shapeColorInterpolator = new ColorInterpolator(getMeasuredHeight());
+            ColorInterpolator shapeColorInterpolator = new ColorInterpolator(page.getHeight());
             shapeColorInterpolator.setColor(SHAPE_COLORS[(i - 1) % SHAPE_COLORS.length]);
             shape.setColorInterpolator(shapeColorInterpolator);
 
             page.setFlashShape(shape);
 
             ColorInterpolator pageBackgroundInterpolator = new ColorInterpolator(page.getHeight());
-            pageBackgroundInterpolator.setColor(COLORS_BACKGROUNDS[(i - 1) % COLORS_BACKGROUNDS.length]);
+            pageBackgroundInterpolator
+                    .setColor(COLORS_BACKGROUNDS[(i - 1) % COLORS_BACKGROUNDS.length]);
             page.setBackgroundColorInterpolator(pageBackgroundInterpolator);
         }
 
-        setContentHeight(getMeasuredHeight() * (PAGE_COUNT + 1));
+        setContentHeight(
+                (getMeasuredHeight() + getPaddingTop() + getPaddingBottom()) * (PAGE_COUNT + 1));
     }
 
-    private TriangleShape getTriangleShape() {
+    private TriangleShape getTriangleShape(FlashShapePage page) {
         TriangleShape shape = new TriangleShape();
-        shape.setXOffset(getMeasuredWidth() / 2 - mMaxShapeWidth / 2);
-        shape.setYOffset(getMeasuredHeight() / 2 - mMaxShapeHeight / 2);
+        shape.setXOffset((int)(page.getWidth() / 2 -
+                mMaxShapeWidth / 2));
+        shape.setYOffset((int)(page.getHeight() / 2 - mMaxShapeHeight / 2));
         shape.setSymmetric(true);
 
-        int triangleWidth = shape.isSymmetric() ? mMaxShapeWidth / 2 : mMaxShapeWidth;
+        float triangleWidth = shape.isSymmetric() ? (mMaxShapeWidth / 2) : mMaxShapeWidth;
         TriangleInterpolator interpolator =
-                new TriangleInterpolator(getMeasuredHeight(), mMaxShapeHeight, triangleWidth);
+                new TriangleInterpolator(page.getHeight(), mMaxShapeHeight, triangleWidth);
         shape.setTriangleInterpolator(interpolator);
         return shape;
     }
 
-    private ArcShape getArcShape() {
+    private ArcShape getArcShape(FlashShapePage page) {
         ArcShape shape = new ArcShape();
-        shape.setXOffset(getMeasuredWidth() / 2 - mMaxShapeWidth / 2);
-        shape.setYOffset(getMeasuredHeight() / 2 - mMaxShapeHeight / 2);
+        shape.setXOffset((int)((page.getWidth() / 2 -
+                mMaxShapeWidth / 2) + getPaddingStart()));
+        shape.setYOffset((int)(page.getHeight() / 2 - mMaxShapeHeight / 2 + getPaddingTop()));
 
-        AngleInterpolator angleInterpolator = new AngleInterpolator(getMeasuredHeight());
+        AngleInterpolator angleInterpolator = new AngleInterpolator(page.getHeight());
         angleInterpolator.setMaxAngle(360.0f);
         shape.setAngleInterpolator(angleInterpolator);
         return shape;
@@ -135,7 +147,8 @@ public class ShapeFlashView extends AbsCustomScrollingView<FlashShapePage> {
         }
 
         FlashShape shape = page.getFlashShape();
-        if (page.getYPosition() + shape.getYOffset() > getMeasuredHeight() + getScrollY()) {
+        if (page.getYPosition() + shape.getYOffset() >
+                (getMeasuredHeight() + getScrollY() + getPaddingTop())) {
             // Shape has not come into view. Do not draw.
             return;
         }
@@ -155,12 +168,12 @@ public class ShapeFlashView extends AbsCustomScrollingView<FlashShapePage> {
         ColorInterpolator colorInterpolator = shape.getColorInterpolator();
         AngleInterpolator angleInterpolator = shape.getAngleInterpolator();
 
-        if (getScrollY() >= page.getYPosition() + shape.getYOffset()) {
+        if (pageShapeScrolledToTop(page, shape)) {
             // Means we've scrolled the current page to the top top of the visible part of the view.
             // Only drawing arcs for now
 
             // Draw the arc
-            float boundingRectTop = getScrollY() + shape.getYOffset();
+            float boundingRectTop = getScrollY() + shape.getYOffset() + getPaddingTop();
             float boundingRectLeft = page.getXPosition() + shape.getXOffset();
             float boundingRectRight = boundingRectLeft + mMaxShapeWidth;
             float boundingRectBottom = boundingRectTop + mMaxShapeHeight;
@@ -171,13 +184,13 @@ public class ShapeFlashView extends AbsCustomScrollingView<FlashShapePage> {
 
             canvas.drawArc(ovalBounds, 0, angleInterpolator.getInterpolatedAngle(), true, paint);
         } else {
-            colorInterpolator.updateValue(
-                    colorInterpolator.getMaxValue() - (page.getYPosition() - getScrollY()));
-            angleInterpolator.updateValue(
-                    angleInterpolator.getMaxValue() - (page.getYPosition() - getScrollY()));
+            colorInterpolator.updateValue(colorInterpolator.getMaxValue() -
+                    (page.getYPosition() - getScrollY() - getPaddingTop() - getPaddingBottom()));
+            angleInterpolator.updateValue(angleInterpolator.getMaxValue() -
+                    (page.getYPosition() - getScrollY() - getPaddingTop() - getPaddingBottom()));
 
             // Draw the arc
-            float boundingRectTop = page.getYPosition() + shape.getYOffset();
+            float boundingRectTop = page.getYPosition() + shape.getYOffset() + getPaddingTop();
             float boundingRectLeft = page.getXPosition() + shape.getXOffset();
             float boundingRectRight = boundingRectLeft + mMaxShapeWidth;
             float boundingRectBottom = boundingRectTop + mMaxShapeHeight;
@@ -198,12 +211,11 @@ public class ShapeFlashView extends AbsCustomScrollingView<FlashShapePage> {
         ColorInterpolator colorInterpolator = shape.getColorInterpolator();
         TriangleInterpolator triangleInterpolator = shape.getTriangleInterpolator();
 
-        if (getScrollY() >= page.getYPosition() + shape.getYOffset()) {
+        if (pageShapeScrolledToTop(page, shape)) {
             // Means we've scrolled the current page to the top of the visible part of the view.
             // Only drawing arcs for now
 
-            // Draw the arc
-            float boundingRectTop = getScrollY() + shape.getYOffset();
+            float boundingRectTop = getScrollY() + shape.getYOffset() + getPaddingTop();
             float boundingRectLeft = page.getXPosition() + shape.getXOffset();
             float boundingRectRight = boundingRectLeft + mMaxShapeWidth;
             float boundingRectBottom = boundingRectTop + mMaxShapeHeight;
@@ -214,16 +226,16 @@ public class ShapeFlashView extends AbsCustomScrollingView<FlashShapePage> {
 
             drawTriangleShape(canvas, boundingRect, triangleInterpolator, shape, paint);
         } else {
-            colorInterpolator.updateValue(
-                    colorInterpolator.getMaxValue() - (page.getYPosition() - getScrollY()));
-            triangleInterpolator.updateValue(
-                    triangleInterpolator.getMaxValue() - (page.getYPosition() - getScrollY()));
+            colorInterpolator.updateValue(colorInterpolator.getMaxValue() -
+                    (page.getYPosition() - getScrollY() - getPaddingTop()));
+            triangleInterpolator.updateValue(triangleInterpolator.getMaxValue() -
+                    (page.getYPosition() - getScrollY() - getPaddingTop()));
             paint.setColor(colorInterpolator.getInterpolatedShade());
 
-            float boundingRectTop = page.getYPosition() + shape.getYOffset();
+            float boundingRectTop = page.getYPosition() + shape.getYOffset() + getPaddingTop();
             float boundingRectLeft = page.getXPosition() + shape.getXOffset();
             float boundingRectRight = boundingRectLeft + mMaxShapeWidth;
-            float boundingRectBottom = boundingRectTop + mMaxShapeHeight;
+            float boundingRectBottom = boundingRectTop + mMaxShapeWidth;
 
             RectF boundingRect = new RectF(boundingRectLeft, boundingRectTop, boundingRectRight,
                     boundingRectBottom);
@@ -285,24 +297,14 @@ public class ShapeFlashView extends AbsCustomScrollingView<FlashShapePage> {
         if (page.isVisible()) {
             ColorInterpolator interpolator = page.getBackgroundColorInterpolator();
             interpolator
-                    .updateValue(interpolator.getMaxValue() - (page.getYPosition() - getScrollY()));
-            drawShadedBackground(canvas, interpolator, page.getYPosition());
+                    .updateValue(interpolator.getMaxValue() -
+                            (page.getYPosition() - getScrollY() - getPaddingTop() -
+                                    getPaddingBottom()));
+            drawShadedBackground(canvas, interpolator, page);
         }
     }
 
-    private void drawShadedBackground(Canvas canvas, ColorInterpolator interpolator,
-            int yPosition) {
-        // Determine bounds of the shaded region.
-        int rectTop = yPosition;
-        int rectLeft = 0;
-        int rectRight = getMeasuredWidth();
-        int rectBottom = interpolator.getValue() + rectTop + 50;
-        Rect shadeRect = new Rect(rectLeft, rectTop, rectRight, rectBottom);
-
-        // Compute shade based on interpolation.
-        Paint paint = new Paint();
-        paint.setColor(interpolator.getInterpolatedShade());
-        paint.setStyle(Paint.Style.FILL);
-        canvas.drawRect(shadeRect, paint);
+    private boolean pageShapeScrolledToTop(FlashShapePage page, FlashShape shape) {
+        return (getScrollY() - getPaddingTop()) >= page.getYPosition() + shape.getYOffset();
     }
 }
