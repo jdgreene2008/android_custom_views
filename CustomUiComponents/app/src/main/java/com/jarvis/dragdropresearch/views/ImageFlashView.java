@@ -82,12 +82,18 @@ public class ImageFlashView extends AbsCustomScrollingView<ImagePage> {
 
         // Assumes fixed-size pages for now.
         final Random random = new Random(System.currentTimeMillis());
+        int startPosition = 0;
         for (int i = 1; i <= PAGE_COUNT; i++) {
             ImagePage page = new ImagePage();
-            page.setHeight(getMeasuredHeight());
-            page.setWidth(getMeasuredWidth());
-            page.setXPosition(0);
-            page.setYPosition(i * getMeasuredHeight());
+            page.setHeight(getMeasuredHeight() - (getPaddingTop() + getPaddingBottom()));
+            page.setWidth(getMeasuredWidth() - (getPaddingStart() + getPaddingEnd()));
+            page.setXPosition(getPaddingStart());
+            if (startPosition == 0) {
+                startPosition = i * (getMeasuredHeight() - getPaddingBottom());
+            } else {
+                startPosition += page.getHeight();
+            }
+            page.setYPosition(startPosition);
             mPages.add(page);
 
             ColorInterpolator interpolator = new ColorInterpolator(page.getHeight());
@@ -95,7 +101,8 @@ public class ImageFlashView extends AbsCustomScrollingView<ImagePage> {
             page.setBackgroundColorInterpolator(interpolator);
         }
 
-        setContentHeight(getMeasuredHeight() * (PAGE_COUNT + 1));
+        setContentHeight(
+                (getMeasuredHeight() + getPaddingTop() + getPaddingBottom()) * (PAGE_COUNT + 1));
     }
 
     private void prepareImages() {
@@ -139,8 +146,8 @@ public class ImageFlashView extends AbsCustomScrollingView<ImagePage> {
                             int imgHeight = bm.getHeight();
                             int imgWidth = bm.getWidth();
 
-                            int imgTop =  getMeasuredHeight() / 2 - imgHeight / 2;
-                            int imgLeft = getMeasuredWidth() / 2 - imgWidth / 2;
+                            int imgTop = (page.getHeight() / 2 - imgHeight / 2) + getPaddingTop();
+                            int imgLeft = (page.getWidth() / 2 - imgWidth / 2) + getPaddingStart();
 
                             image.setXOffset(imgLeft);
                             image.setYOffset(imgTop);
@@ -188,14 +195,15 @@ public class ImageFlashView extends AbsCustomScrollingView<ImagePage> {
     }
 
     private void drawPageImage(ImagePage page, Canvas canvas) {
-        if (!page.isVisible()){
+        if (!page.isVisible()) {
             return;
         }
 
         FlashImage image = page.getImage();
         if (!image.isImageAvailable()) return;
 
-        if (page.getYPosition() + image.getYOffset() > getMeasuredHeight() + getScrollY()) {
+        if (page.getYPosition() + image.getYOffset() >
+                (getMeasuredHeight() + getScrollY() + getPaddingTop())) {
             // Picture has not come into view. Do not draw.
             return;
         }
@@ -206,18 +214,19 @@ public class ImageFlashView extends AbsCustomScrollingView<ImagePage> {
         Paint paint = new Paint();
 
         AlphaInterpolator interpolator = image.getAlphaInterpolator();
-        interpolator.updateValue(interpolator.getMaxValue() - (page.getYPosition() - getScrollY()));
+        interpolator.updateValue(interpolator.getMaxValue() -
+                (page.getYPosition() - getScrollY() - getPaddingTop() - getPaddingBottom()));
         paint.setAlpha(interpolator.getInterpolatedAlpha());
 
-        if (getScrollY() >= page.getYPosition() + image.getYOffset()) {
+        if ((getScrollY() - getPaddingTop()) >= page.getYPosition() + image.getYOffset()) {
             // Means we've scrolled the current page to the top top of the visible part of the view.
             canvas.drawBitmap(bm,
                     page.getXPosition() + image.getXOffset(),
-                    getScrollY() + +image.getYOffset(), paint);
+                    getScrollY() + +image.getYOffset() + getPaddingTop(), paint);
         } else {
             canvas.drawBitmap(bm,
                     page.getXPosition() + image.getXOffset(),
-                    page.getYPosition() + +image.getYOffset(), paint);
+                    page.getYPosition() + +image.getYOffset() + getPaddingTop(), paint);
         }
     }
 
@@ -225,18 +234,22 @@ public class ImageFlashView extends AbsCustomScrollingView<ImagePage> {
         if (page.isVisible()) {
             ColorInterpolator interpolator = page.getBackgroundColorInterpolator();
             interpolator
-                    .updateValue(interpolator.getMaxValue() - (page.getYPosition() - getScrollY()));
-            drawShadedBackground(canvas, interpolator, page.getYPosition());
+                    .updateValue(interpolator.getMaxValue() -
+                            (page.getYPosition() - getScrollY() - getPaddingTop() -
+                                    getPaddingBottom()));
+            drawShadedBackground(canvas, interpolator, page);
         }
     }
 
     private void drawShadedBackground(Canvas canvas, ColorInterpolator interpolator,
-            int yPosition) {
+            ImagePage page) {
         // Determine bounds of the shaded region.
-        int rectTop = yPosition;
-        int rectLeft = 0;
-        int rectRight = getMeasuredWidth();
-        int rectBottom = interpolator.getValue() + rectTop + 50;
+        int rectTop =
+                page.isScrolledToTop() ? (getScrollY() + getPaddingTop()) : page.getYPosition();
+        int rectLeft = getPaddingStart();
+        int rectRight = getMeasuredWidth() - getPaddingEnd();
+        int rectBottom = page.isScrolledToTop() ? rectTop + page.getHeight() :
+                interpolator.getValue() + rectTop - getPaddingBottom();
         Rect shadeRect = new Rect(rectLeft, rectTop, rectRight, rectBottom);
 
         // Compute shade based on interpolation.
