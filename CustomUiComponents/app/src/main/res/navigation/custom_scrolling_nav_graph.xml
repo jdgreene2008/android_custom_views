@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/custom_scrolling_nav_graph"
+    app:startDestination="@id/customScrollingDemoLaunchFragment">
+
+    <fragment android:id="@+id/customScrollingDemoLaunchFragment"
+        android:name="com.jarvis.dragdropresearch.fragment.CustomScrollingDemoLaunchFragment"
+        android:label="CustomScrollingDemoLaunchFragment" >
+        <action android:id="@+id/action_customScrollingDemoLaunchFragment_to_scrollingRailsViewFragment"
+            app:destination="@id/scrollingRailsViewFragment" />
+        <action android:id="@+id/action_customScrollingDemoLaunchFragment_to_imageFlashViewFragment"
+            app:destination="@id/imageFlashViewFragment" />
+        <action android:id="@+id/action_customScrollingDemoLaunchFragment_to_flashShapeViewFragment"
+            app:destination="@id/flashShapeViewFragment" />
+    </fragment>
+    <fragment android:id="@+id/scrollingRailsViewFragment"
+        android:name="com.jarvis.dragdropresearch.fragment.ScrollingRailsViewFragment"
+        android:label="ScrollingRailsViewFragment" >
+        <action android:id="@+id/action_scrollingRailsViewFragment_to_customScrollingDemoLaunchFragment"
+            app:popUpTo="@id/customScrollingDemoLaunchFragment" />
+    </fragment>
+    <fragment android:id="@+id/imageFlashViewFragment"
+        android:name="com.jarvis.dragdropresearch.fragment.ImageFlashViewFragment"
+        android:label="ImageFlashViewFragment" >
+        <action android:id="@+id/action_imageFlashViewFragment_to_customScrollingDemoLaunchFragment"
+            app:popUpTo="@id/customScrollingDemoLaunchFragment" />
+    </fragment>
+    <fragment android:id="@+id/flashShapeViewFragment"
+        android:name="com.jarvis.dragdropresearch.fragment.FlashShapeViewFragment"
+        android:label="FlashShapeViewFragment" >
+        <action android:id="@+id/action_flashShapeViewFragment_to_customScrollingDemoLaunchFragment"
+            app:popUpTo="@id/customScrollingDemoLaunchFragment" />
+    </fragment>
+</navigation>

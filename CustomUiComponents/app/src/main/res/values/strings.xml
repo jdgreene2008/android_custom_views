@@ -1,4 +1,10 @@
 <resources>
     <string name="app_name">Scrolling Mechanics Practice</string>
     <string name="label_pizza">Mushroom!</string>
+
+    <!-- Custom Scrolling Launch Page -->
+    <string name="btn_launch_scrolling_rails">Scrolling Rails Demo</string>
+    <string name="btn_launch_image_flash">Image Flash Demo</string>
+    <string name="btn_launch_shape_flash">Shape Flash Demo</string>
+
 </resources>
