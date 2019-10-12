@@ -74,6 +74,8 @@ public class ScrollingRailsView extends AbsCustomScrollingView<RailPage> {
             interpolator.setColor(COLORS_BACKGROUNDS[g]);
             currentPage.setColorInterpolator(interpolator);
         }
+
+        setContentHeight(getMeasuredHeight() * (pageCount + 1));
     }
 
     @Override
@@ -93,9 +95,6 @@ public class ScrollingRailsView extends AbsCustomScrollingView<RailPage> {
         if (mPages != null) {
             for (RailPage page : mPages) {
                 drawBackground(canvas, page);
-            }
-
-            for (RailPage page : mPages) {
                 drawPageRail(page, canvas);
             }
         }
