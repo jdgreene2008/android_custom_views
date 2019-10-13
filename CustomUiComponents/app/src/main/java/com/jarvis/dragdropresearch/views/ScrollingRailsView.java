@@ -44,12 +44,18 @@ public class ScrollingRailsView extends AbsCustomScrollingView<ScrollingRailsPag
         mPages = new ArrayList<>(pageCount);
 
         // Assumes fixed-size pages for now.
+        int startPosition = 0;
         for (int i = 1; i <= pageCount; i++) {
             ScrollingRailsPage page = new ScrollingRailsPage();
-            page.setHeight(getMeasuredHeight());
-            page.setWidth(getMeasuredWidth());
+            page.setHeight(getMeasuredHeight() - getPaddingTop() - getPaddingBottom());
+            page.setWidth(getMeasuredWidth() - getPaddingStart() - getPaddingEnd());
             page.setXPosition(0);
-            page.setYPosition(i * getMeasuredHeight());
+            if (startPosition == 0) {
+                startPosition = getContentBoundsBottom();
+            } else {
+                startPosition += page.getHeight();
+            }
+            page.setYPosition(startPosition);
             mPages.add(page);
         }
 
@@ -59,13 +65,13 @@ public class ScrollingRailsView extends AbsCustomScrollingView<ScrollingRailsPag
         for (int g = 0; g < pageCount; g++) {
             ScrollingRailsPage currentPage = mPages.get(g);
 
-            final int railY = (g + 1) * currentPage.getHeight();
-            final int railX = ((g == 0) ? gapX :
-                    ((g == pageCount - 1) ? (currentPage.getWidth() - gapX) :
-                            (gapX + currentPage.getWidth() / pageCount)));
+            final int railX = ((g == 0) ? getPaddingStart() + gapX :
+                    ((g == pageCount - 1) ? (getPaddingStart() + currentPage.getWidth() - gapX) :
+                            getPaddingStart() + (gapX + currentPage.getWidth() / pageCount)));
+
             for (int i = 0; i < 5; i++) {
                 int color = COLORS_OBJECTS[(i % COLORS_OBJECTS.length)];
-                currentPage.addObject(new MovableObject(railX, railY + gapY * i,
+                currentPage.addObject(new MovableObject(railX, gapY * i,
                         "1", color));
             }
 
@@ -74,7 +80,8 @@ public class ScrollingRailsView extends AbsCustomScrollingView<ScrollingRailsPag
             currentPage.setColorInterpolator(interpolator);
         }
 
-        setContentHeight(getMeasuredHeight() * (pageCount + 1));
+        setContentHeight(
+                (getMeasuredHeight() + getPaddingTop() + getPaddingBottom() + gapY * 5) * (pageCount + 1));
     }
 
     @Override
@@ -100,32 +107,32 @@ public class ScrollingRailsView extends AbsCustomScrollingView<ScrollingRailsPag
     }
 
     private void drawPageRail(ScrollingRailsPage page, Canvas canvas) {
-        if (!page.isVisible()) return;
+        if (page.isVisible()) {
+            final int offset = 25;
+            final int radius = 50;
 
-        final int offset = 25;
-        final int radius = 50;
+            List<MovableObject> pageObjects = page.getMovableObjectRails();
+            Paint paint = new Paint();
 
-        List<MovableObject> pageObjects = page.getMovableObjectRails();
-        Paint paint = new Paint();
+            int count = 0;
+            for (MovableObject object : pageObjects) {
+                paint.setColor(object.getColor());
+                if ((page.getYPosition() + object.getYOffset()) > getContentBoundsBottom()) {
+                    // Object is off-screen and any objects that follow it is off-screen. No need to
+                    // continue traversal.
+                    break;
+                }
+                if ((page.getYPosition() + object.getYOffset()) <= getContentBoundsTop()) {
+                    /* Means we've scrolled to the top of the visible part of the object to draw. */
+                    canvas.drawCircle(object.getXOffset(),
+                            getContentBoundsTop() + (offset * count), radius, paint);
+                } else {
+                    int yPosition = page.getYPosition() + object.getYOffset();
+                    canvas.drawCircle(object.getXOffset(), yPosition, radius, paint);
+                }
 
-        int count = 0;
-        for (MovableObject object : pageObjects) {
-            paint.setColor(object.getColor());
-            if (object.getYPos() > (getMeasuredHeight() + getScrollY())) {
-                // Object is off-screen and any objects that follow it is off-screen. No need to
-                // continue traversal.
-                break;
+                count++;
             }
-            if (getScrollY() >= object.getYPos()) {
-                /* Means we've scrolled to the top of the visible part of the object to draw. */
-                canvas.drawCircle(object.getXPos(),
-                        getScrollY() + (offset * count), radius, paint);
-            } else {
-                int yPosition = object.getYPos();
-                canvas.drawCircle(object.getXPos(), yPosition, radius, paint);
-            }
-
-            count++;
         }
     }
 
@@ -133,7 +140,7 @@ public class ScrollingRailsView extends AbsCustomScrollingView<ScrollingRailsPag
         if (page.isVisible()) {
             ColorInterpolator interpolator = page.getColorInterpolator();
             interpolator
-                    .updateValue(interpolator.getMaxValue() - (page.getYPosition() - getScrollY()));
+                    .updateValue(getContentBoundsBottom() - page.getYPosition());
             drawShadedBackground(canvas, interpolator, page);
         }
     }

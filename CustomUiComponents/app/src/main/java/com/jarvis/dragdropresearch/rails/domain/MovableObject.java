@@ -5,32 +5,32 @@ package com.jarvis.dragdropresearch.rails.domain;
  */
 public class MovableObject {
 
-    private int mXPos;
-    private int mYPos;
+    private int mXOffset;
+    private int mYOffset;
     private String mId;
     private int mColor;
 
     public MovableObject(int initialX, int initialY, String id, int color) {
-        mXPos = initialX;
-        mYPos = initialY;
+        mXOffset = initialX;
+        mYOffset = initialY;
         mId = id;
         mColor = color;
     }
 
-    public int getXPos() {
-        return mXPos;
+    public int getXOffset() {
+        return mXOffset;
     }
 
-    public void setXPos(int XPos) {
-        mXPos = XPos;
+    public void setXOffset(int XOffset) {
+        mXOffset = XOffset;
     }
 
-    public int getYPos() {
-        return mYPos;
+    public int getYOffset() {
+        return mYOffset;
     }
 
-    public void setYPos(int YPos) {
-        mYPos = YPos;
+    public void setYOffset(int YOffset) {
+        mYOffset = YOffset;
     }
 
     public int getColor() {

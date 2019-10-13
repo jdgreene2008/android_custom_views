@@ -35,11 +35,6 @@ public class ImageFlashView extends AbsCustomScrollingView<ImageFlashPage> {
     private static final int[] COLORS_BACKGROUNDS =
             new int[] {Color.MAGENTA, Color.CYAN, Color.LTGRAY, Color.BLUE, Color.RED};
     /**
-     * Maximum number of images to cache.
-     */
-    private static final int IMAGE_CACHE_SIZE = 5;
-
-    /**
      * Image page padding in pixels.
      */
     private static final int PADDING = 50;

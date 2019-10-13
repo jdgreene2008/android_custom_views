@@ -78,10 +78,8 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
             page.setYPosition(startPosition);
 
             mPages.add(page);
-            mPages.add(page);
 
             FlashShape shape;
-
             if (i % 3 == 0) {
                 shape = getArcShape(page);
             } else if (i % 3 == 1) {
@@ -194,7 +192,7 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
             // Only drawing arcs for now
 
             // Draw the arc
-            float boundingRectTop = getScrollY() + shape.getYOffset() + getPaddingTop();
+            float boundingRectTop = getContentBoundsTop() + shape.getYOffset();
             float boundingRectLeft = page.getXPosition() + shape.getXOffset();
             float boundingRectRight = boundingRectLeft + mMaxShapeWidth;
             float boundingRectBottom = boundingRectTop + mMaxShapeHeight;
@@ -234,8 +232,8 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
             // Means we've scrolled the current page to the top top of the visible part of the view.
             // Only drawing arcs for now
 
-            // Draw the arc
-            float boundingRectTop = getScrollY() + shape.getYOffset() + getPaddingTop();
+            // Draw the rectangle.
+            float boundingRectTop = getContentBoundsTop() + shape.getYOffset();
             float boundingRectLeft = page.getXPosition() + shape.getXOffset();
             float boundingRectRight = boundingRectLeft + mMaxShapeWidth;
             float boundingRectBottom = boundingRectTop + mMaxShapeHeight;
@@ -334,7 +332,7 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
                     boundingRectBottom);
             paint.setColor(colorInterpolator.getInterpolatedShade());
 
-            drawTriangleShape(canvas, boundingRect, triangleInterpolator, shape, paint);
+            drawTriangleShape(canvas, boundingRect, triangleInterpolator, paint);
         } else {
             colorInterpolator.updateValue(getContentBoundsBottom() - page.getYPosition());
             triangleInterpolator.updateValue(getContentBoundsBottom() - page.getYPosition());
@@ -348,18 +346,19 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
             RectF boundingRect = new RectF(boundingRectLeft, boundingRectTop, boundingRectRight,
                     boundingRectBottom);
 
-            drawTriangleShape(canvas, boundingRect, triangleInterpolator, shape, paint);
+            drawTriangleShape(canvas, boundingRect, triangleInterpolator, paint);
         }
     }
 
     private void drawTriangleShape(Canvas canvas, RectF bounds,
-            TriangleInterpolator triangleInterpolator, TriangleShape triangle, Paint paint) {
+            TriangleInterpolator triangleInterpolator, Paint paint) {
         float baseInterpolation = triangleInterpolator
                 .getInterpolatedValues()[TriangleInterpolator.INTERPOLATION_VALUES_BASE];
         float altitudeInterpolation = triangleInterpolator
                 .getInterpolatedValues()[TriangleInterpolator.INTERPOLATION_VALUES_ALTITUDE];
 
-        // Construct the Left Triangle
+        // *** Construct the Left Triangle ** //
+
         // Bottom left vertex
         float bottomLeftX = bounds.left;
         float bottomLeftY = bounds.bottom;
@@ -381,7 +380,8 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
         canvas.drawPath(leftTriangle, paint);
 
         if (triangleInterpolator.isSymmetric()) {
-            // Construct right triangle.
+            // *** Construct the Right Triangle ** //
+
             bottomLeftX = bounds.right - baseInterpolation;
             bottomLeftY = bounds.bottom;
 
