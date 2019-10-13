@@ -63,7 +63,7 @@ public class FlashShape {
 
     public enum Type {
         ARC,
-        CIRCLE,
+        SPIRAL,
         RECTANGLE,
         TRIANGLE
     }
