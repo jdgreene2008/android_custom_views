@@ -6,7 +6,7 @@ import com.jarvis.dragdropresearch.rails.domain.MovableObject;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RailPage extends ScrollPage {
+public class ScrollingRailsPage extends ScrollPage {
 
     private List<MovableObject> mMovableObjectRails;
 

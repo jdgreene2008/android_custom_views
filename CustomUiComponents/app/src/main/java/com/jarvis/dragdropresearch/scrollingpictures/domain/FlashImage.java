@@ -1,7 +1,7 @@
 package com.jarvis.dragdropresearch.scrollingpictures.domain;
 
 import com.jarvis.dragdropresearch.interpolators.AlphaInterpolator;
-import com.jarvis.dragdropresearch.views.ImagePage;
+import com.jarvis.dragdropresearch.views.ImageFlashPage;
 
 import androidx.annotation.DrawableRes;
 
@@ -27,7 +27,7 @@ public class FlashImage {
     }
 
     /**
-     * @return Distance in pixels from the left side of the {@link ImagePage}
+     * @return Distance in pixels from the left side of the {@link ImageFlashPage}
      * hosting this image.
      */
     public int getXOffset() {
@@ -35,7 +35,7 @@ public class FlashImage {
     }
 
     /**
-     * @param XOffset Distance in pixels from the left side of the {@link ImagePage}
+     * @param XOffset Distance in pixels from the left side of the {@link ImageFlashPage}
      * hosting this image.
      */
     public void setXOffset(int XOffset) {
@@ -43,14 +43,14 @@ public class FlashImage {
     }
 
     /**
-     * @return Distance in pixels from the top of the {@link ImagePage} hosting this image.
+     * @return Distance in pixels from the top of the {@link ImageFlashPage} hosting this image.
      */
     public int getYOffset() {
         return mYOffset;
     }
 
     /**
-     * @param YOffset Distance in  pixels from the top of the {@link ImagePage} hosting this
+     * @param YOffset Distance in  pixels from the top of the {@link ImageFlashPage} hosting this
      * image.
      */
     public void setYOffset(int YOffset) {

@@ -25,7 +25,7 @@ import java.util.Random;
 /**
  * Pictures flash in and out of view as the user scrolls.
  */
-public class ImageFlashView extends AbsCustomScrollingView<ImagePage> {
+public class ImageFlashView extends AbsCustomScrollingView<ImageFlashPage> {
     private static final String TAG = ImageFlashView.class.getName();
     private static final int PAGE_COUNT = 3;
     private static final int[] IMAGE_POOL =
@@ -83,7 +83,7 @@ public class ImageFlashView extends AbsCustomScrollingView<ImagePage> {
         final Random random = new Random(System.currentTimeMillis());
         int startPosition = 0;
         for (int i = 1; i <= PAGE_COUNT; i++) {
-            ImagePage page = new ImagePage();
+            ImageFlashPage page = new ImageFlashPage();
             page.setHeight(getMeasuredHeight() - (getPaddingTop() + getPaddingBottom()));
             page.setWidth(getMeasuredWidth() - (getPaddingStart() + getPaddingEnd()));
             page.setXPosition(getPaddingStart());
@@ -136,7 +136,7 @@ public class ImageFlashView extends AbsCustomScrollingView<ImagePage> {
                 Log.d(TAG, "Image Loading Complete");
                 mImageCache = cache;
                 if (mImageCache != null) {
-                    for (ImagePage page : mPages) {
+                    for (ImageFlashPage page : mPages) {
                         FlashImage image = page.getImage();
                         Bitmap bm =
                                 mImageCache.getBitmapFromMemCache(
@@ -188,14 +188,14 @@ public class ImageFlashView extends AbsCustomScrollingView<ImagePage> {
 
     private void drawPages(Canvas canvas) {
         if (mPages != null) {
-            for (ImagePage page : mPages) {
+            for (ImageFlashPage page : mPages) {
                 drawBackground(canvas, page);
                 drawPageImage(page, canvas);
             }
         }
     }
 
-    private void drawPageImage(ImagePage page, Canvas canvas) {
+    private void drawPageImage(ImageFlashPage page, Canvas canvas) {
         if (!page.isVisible()) {
             return;
         }
@@ -230,7 +230,7 @@ public class ImageFlashView extends AbsCustomScrollingView<ImagePage> {
         }
     }
 
-    private void drawBackground(Canvas canvas, ImagePage page) {
+    private void drawBackground(Canvas canvas, ImageFlashPage page) {
         if (page.isVisible()) {
             ColorInterpolator interpolator = page.getBackgroundColorInterpolator();
             interpolator

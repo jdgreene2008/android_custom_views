@@ -14,7 +14,7 @@ import androidx.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ScrollingRailsView extends AbsCustomScrollingView<RailPage> {
+public class ScrollingRailsView extends AbsCustomScrollingView<ScrollingRailsPage> {
     private static final int[] COLORS_OBJECTS =
             new int[] {Color.RED, Color.GREEN, Color.BLUE, Color.YELLOW};
 
@@ -45,7 +45,7 @@ public class ScrollingRailsView extends AbsCustomScrollingView<RailPage> {
 
         // Assumes fixed-size pages for now.
         for (int i = 1; i <= pageCount; i++) {
-            RailPage page = new RailPage();
+            ScrollingRailsPage page = new ScrollingRailsPage();
             page.setHeight(getMeasuredHeight());
             page.setWidth(getMeasuredWidth());
             page.setXPosition(0);
@@ -57,7 +57,7 @@ public class ScrollingRailsView extends AbsCustomScrollingView<RailPage> {
         final int gapX = 200;
 
         for (int g = 0; g < pageCount; g++) {
-            RailPage currentPage = mPages.get(g);
+            ScrollingRailsPage currentPage = mPages.get(g);
 
             final int railY = (g + 1) * currentPage.getHeight();
             final int railX = ((g == 0) ? gapX :
@@ -92,14 +92,14 @@ public class ScrollingRailsView extends AbsCustomScrollingView<RailPage> {
 
     private void drawPages(Canvas canvas) {
         if (mPages != null) {
-            for (RailPage page : mPages) {
+            for (ScrollingRailsPage page : mPages) {
                 drawBackground(canvas, page);
                 drawPageRail(page, canvas);
             }
         }
     }
 
-    private void drawPageRail(RailPage page, Canvas canvas) {
+    private void drawPageRail(ScrollingRailsPage page, Canvas canvas) {
         if (!page.isVisible()) return;
 
         final int offset = 25;
@@ -129,7 +129,7 @@ public class ScrollingRailsView extends AbsCustomScrollingView<RailPage> {
         }
     }
 
-    private void drawBackground(Canvas canvas, RailPage page) {
+    private void drawBackground(Canvas canvas, ScrollingRailsPage page) {
         if (page.isVisible()) {
             ColorInterpolator interpolator = page.getColorInterpolator();
             interpolator

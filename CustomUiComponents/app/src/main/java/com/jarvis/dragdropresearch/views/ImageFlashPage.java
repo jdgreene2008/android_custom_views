@@ -3,7 +3,7 @@ package com.jarvis.dragdropresearch.views;
 import com.jarvis.dragdropresearch.interpolators.ColorInterpolator;
 import com.jarvis.dragdropresearch.scrollingpictures.domain.FlashImage;
 
-public class ImagePage extends ScrollPage {
+public class ImageFlashPage extends ScrollPage {
 
   private FlashImage mImage;
   private ColorInterpolator mBackgroundColorInterpolator;
