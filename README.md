@@ -11,6 +11,7 @@ The below shows the CustomScrollingView.java custom UI component in action. The 
 
 
 ## ImageFlashView Example
+*Uses ImageCacheHelper and ImageLoader, two classes created to faciliated loading Bitmaps efficiently. The ImageCacheHelper is backed by an LruCache. This ensures that the Bitmaps do not consume excessive amounts of memory when stored.*
 
 ![ImageFlashView](/images/image_flash_view.gif)
 
