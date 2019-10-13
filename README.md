@@ -13,11 +13,11 @@ The below shows the CustomScrollingView.java custom UI component in action. The 
 
 
 
-![FlashShapesView-Arc closing](/images/flash_shapes_view.gif)
+![FlashShapesView-Large Window](/images/flash_shape_large_window.gif)
 
 
 
-![FlashShapesView-Similar triangles](/images/flash_shape_view_similar_triangles.gif)
+![FlashShapesView-Mini Window](/images/flash_shape_mini_window.gif)
 
 
 
