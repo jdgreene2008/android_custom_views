@@ -8,7 +8,7 @@ public class SpiralInterpolator extends Interpolator {
      * Represents the number of 180-degree arc segments in this spiral
      * when counting clockwise starting at the 3-o'clock position.
      */
-    public static final int DEFAULT_SEGMENT_COUNT = 10;
+    public static final int DEFAULT_SEGMENT_COUNT = 40;
 
     private int mSegmentMax = DEFAULT_SEGMENT_COUNT;
 

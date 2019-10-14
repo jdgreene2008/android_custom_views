@@ -235,7 +235,7 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
             paint.setColor(colorInterpolator.getInterpolatedShade());
 
             canvas.drawArc(getCommonShapeBoundingRect(page, shape, false), 0,
-                    angleInterpolator.getInterpolatedAngle(), false, paint);
+                    angleInterpolator.getInterpolatedAngle(), true, paint);
         }
     }
     //endregion
