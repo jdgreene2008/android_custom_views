@@ -4,14 +4,12 @@ import android.os.Bundle;
 import android.widget.Toast;
 
 import com.jarvis.dragdropresearch.R;
-import com.jarvis.dragdropresearch.views.BuildableProductView;
 import com.jarvis.dragdropresearch.views.AbsCustomScrollingView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
 
-    private BuildableProductView mProductPanel;
     private AbsCustomScrollingView mGestureView;
 
     @Override
