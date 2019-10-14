@@ -6,21 +6,26 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
+import android.os.Build;
 import android.util.AttributeSet;
 
 import com.jarvis.dragdropresearch.funwithshapes.ArcShape;
 import com.jarvis.dragdropresearch.funwithshapes.FlashShape;
 import com.jarvis.dragdropresearch.funwithshapes.RectangleShape;
+import com.jarvis.dragdropresearch.funwithshapes.SpiralShape;
 import com.jarvis.dragdropresearch.funwithshapes.TriangleShape;
 import com.jarvis.dragdropresearch.interpolators.AngleInterpolator;
 import com.jarvis.dragdropresearch.interpolators.ColorInterpolator;
 import com.jarvis.dragdropresearch.interpolators.RectangleInterpolator;
+import com.jarvis.dragdropresearch.interpolators.SpiralInterpolator;
+import com.jarvis.dragdropresearch.interpolators.SpiralSegment;
 import com.jarvis.dragdropresearch.interpolators.TriangleInterpolator;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
@@ -80,12 +85,14 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
             mPages.add(page);
 
             FlashShape shape;
-            if (i % 3 == 0) {
+            if (i % 4 == 0) {
                 shape = getArcShape(page);
-            } else if (i % 3 == 1) {
+            } else if (i % 4 == 1) {
                 shape = getTriangleShape(page);
-            } else {
+            } else if (i % 4 == 2) {
                 shape = getRectangleShape(page);
+            } else {
+                shape = getSpiralShape(page);
             }
 
             ColorInterpolator shapeColorInterpolator = new ColorInterpolator(page.getHeight());
@@ -115,6 +122,19 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
                 new TriangleInterpolator(page.getHeight(), mMaxShapeHeight, mMaxShapeWidth,
                         random.nextInt(500) % 10 < 5);
         shape.setTriangleInterpolator(interpolator);
+        return shape;
+    }
+
+    private SpiralShape getSpiralShape(FlashShapePage page) {
+        Random random = new Random();
+        SpiralShape shape = new SpiralShape();
+        shape.setXOffset((int)(page.getWidth() / 2 -
+                mMaxShapeWidth / 2));
+        shape.setYOffset((int)(page.getHeight() / 2 - mMaxShapeHeight / 2));
+
+        SpiralInterpolator interpolator =
+                new SpiralInterpolator(page.getHeight(), (int)mMaxShapeHeight, (int)mMaxShapeWidth);
+        shape.setSpiralInterpolator(interpolator);
         return shape;
     }
 
@@ -159,6 +179,14 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
         }
     }
 
+    private void drawBackground(Canvas canvas, FlashShapePage page) {
+        if (page.isVisible()) {
+            ColorInterpolator interpolator = page.getBackgroundColorInterpolator();
+            interpolator.updateValue(getContentBoundsBottom() - page.getYPosition());
+            drawShadedBackground(canvas, interpolator, page);
+        }
+    }
+
     private void drawPageShape(FlashShapePage page, Canvas canvas) {
         if (!page.isVisible()) {
             return;
@@ -176,9 +204,12 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
             drawTriangleShape(canvas, page);
         } else if (shape instanceof RectangleShape) {
             drawRectangleShape(canvas, page);
+        } else if (shape instanceof SpiralShape) {
+            drawSpiralShape(canvas, page);
         }
     }
 
+    //region Arc Drawing
     private void drawArcShape(Canvas canvas, FlashShapePage page) {
         ArcShape shape = (ArcShape)page.getFlashShape();
 
@@ -192,34 +223,24 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
             // Only drawing arcs for now
 
             // Draw the arc
-            float boundingRectTop = getContentBoundsTop() + shape.getYOffset();
-            float boundingRectLeft = page.getXPosition() + shape.getXOffset();
-            float boundingRectRight = boundingRectLeft + mMaxShapeWidth;
-            float boundingRectBottom = boundingRectTop + mMaxShapeHeight;
-
-            RectF ovalBounds = new RectF(boundingRectLeft, boundingRectTop, boundingRectRight,
-                    boundingRectBottom);
             paint.setColor(colorInterpolator.getInterpolatedShade());
 
-            canvas.drawArc(ovalBounds, 0, angleInterpolator.getInterpolatedAngle(), false, paint);
+            canvas.drawArc(getCommonShapeBoundingRect(page, shape, true), 0,
+                    angleInterpolator.getInterpolatedAngle(), true, paint);
         } else {
             colorInterpolator.updateValue(getContentBoundsBottom() - page.getYPosition());
             angleInterpolator.updateValue(getContentBoundsBottom() - page.getYPosition());
 
             // Draw the arc
-            float boundingRectTop = page.getYPosition() + shape.getYOffset() + getPaddingTop();
-            float boundingRectLeft = page.getXPosition() + shape.getXOffset();
-            float boundingRectRight = boundingRectLeft + mMaxShapeWidth;
-            float boundingRectBottom = boundingRectTop + mMaxShapeHeight;
-
-            RectF ovalBounds = new RectF(boundingRectLeft, boundingRectTop, boundingRectRight,
-                    boundingRectBottom);
             paint.setColor(colorInterpolator.getInterpolatedShade());
 
-            canvas.drawArc(ovalBounds, 0, angleInterpolator.getInterpolatedAngle(), false, paint);
+            canvas.drawArc(getCommonShapeBoundingRect(page, shape, false), 0,
+                    angleInterpolator.getInterpolatedAngle(), false, paint);
         }
     }
+    //endregion
 
+    //region Rectangle Drawing
     private void drawRectangleShape(Canvas canvas, FlashShapePage page) {
         RectangleShape shape = (RectangleShape)page.getFlashShape();
 
@@ -233,31 +254,19 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
             // Only drawing arcs for now
 
             // Draw the rectangle.
-            float boundingRectTop = getContentBoundsTop() + shape.getYOffset();
-            float boundingRectLeft = page.getXPosition() + shape.getXOffset();
-            float boundingRectRight = boundingRectLeft + mMaxShapeWidth;
-            float boundingRectBottom = boundingRectTop + mMaxShapeHeight;
-
-            RectF bounds = new RectF(boundingRectLeft, boundingRectTop, boundingRectRight,
-                    boundingRectBottom);
             paint.setColor(colorInterpolator.getInterpolatedShade());
 
-            drawRectangleShape(canvas, bounds, rectangleInterpolator, paint);
+            drawRectangleShape(canvas, getCommonShapeBoundingRect(page, shape, true),
+                    rectangleInterpolator, paint);
         } else {
             colorInterpolator.updateValue(getContentBoundsBottom() - page.getYPosition());
             rectangleInterpolator.updateValue(getContentBoundsBottom() - page.getYPosition());
 
-            // Draw the arc
-            float boundingRectTop = page.getYPosition() + shape.getYOffset() + getPaddingTop();
-            float boundingRectLeft = page.getXPosition() + shape.getXOffset();
-            float boundingRectRight = boundingRectLeft + mMaxShapeWidth;
-            float boundingRectBottom = boundingRectTop + mMaxShapeHeight;
-
-            RectF bounds = new RectF(boundingRectLeft, boundingRectTop, boundingRectRight,
-                    boundingRectBottom);
+            // Draw the rectangle
             paint.setColor(colorInterpolator.getInterpolatedShade());
 
-            drawRectangleShape(canvas, bounds, rectangleInterpolator, paint);
+            drawRectangleShape(canvas, getCommonShapeBoundingRect(page, shape, false),
+                    rectangleInterpolator, paint);
         }
     }
 
@@ -310,7 +319,9 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
             canvas.drawRect(left, top, right, bottom, paint);
         }
     }
+    //endregion
 
+    //region Triangle Drawing
     private void drawTriangleShape(Canvas canvas, FlashShapePage page) {
         TriangleShape shape = (TriangleShape)page.getFlashShape();
 
@@ -322,31 +333,17 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
         if (pageShapeScrolledToTop(page, shape)) {
             // Means we've scrolled the current page to the top of the visible part of the view.
             // Only drawing arcs for now
-
-            float boundingRectTop = getContentBoundsTop() + shape.getYOffset();
-            float boundingRectLeft = page.getXPosition() + shape.getXOffset();
-            float boundingRectRight = boundingRectLeft + mMaxShapeWidth;
-            float boundingRectBottom = boundingRectTop + mMaxShapeHeight;
-
-            RectF boundingRect = new RectF(boundingRectLeft, boundingRectTop, boundingRectRight,
-                    boundingRectBottom);
             paint.setColor(colorInterpolator.getInterpolatedShade());
 
-            drawTriangleShape(canvas, boundingRect, triangleInterpolator, paint);
+            drawTriangleShape(canvas, getCommonShapeBoundingRect(page, shape, true),
+                    triangleInterpolator, paint);
         } else {
             colorInterpolator.updateValue(getContentBoundsBottom() - page.getYPosition());
             triangleInterpolator.updateValue(getContentBoundsBottom() - page.getYPosition());
             paint.setColor(colorInterpolator.getInterpolatedShade());
 
-            float boundingRectTop = page.getYPosition() + shape.getYOffset() + getPaddingTop();
-            float boundingRectLeft = page.getXPosition() + shape.getXOffset();
-            float boundingRectRight = boundingRectLeft + mMaxShapeWidth;
-            float boundingRectBottom = boundingRectTop + mMaxShapeWidth;
-
-            RectF boundingRect = new RectF(boundingRectLeft, boundingRectTop, boundingRectRight,
-                    boundingRectBottom);
-
-            drawTriangleShape(canvas, boundingRect, triangleInterpolator, paint);
+            drawTriangleShape(canvas, getCommonShapeBoundingRect(page, shape, false),
+                    triangleInterpolator, paint);
         }
     }
 
@@ -400,12 +397,134 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
             canvas.drawPath(rightTriangle, paint);
         }
     }
+    //endregion
 
-    private void drawBackground(Canvas canvas, FlashShapePage page) {
-        if (page.isVisible()) {
-            ColorInterpolator interpolator = page.getBackgroundColorInterpolator();
-            interpolator.updateValue(getContentBoundsBottom() - page.getYPosition());
-            drawShadedBackground(canvas, interpolator, page);
+    //region Spiral Shape Drawing
+    private void drawSpiralShape(Canvas canvas, FlashShapePage page) {
+        SpiralShape shape = (SpiralShape)page.getFlashShape();
+
+        Paint paint = new Paint();
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(10);
+        ColorInterpolator colorInterpolator = shape.getColorInterpolator();
+        SpiralInterpolator spiralInterpolator = shape.getSpiralInterpolator();
+
+        if (pageShapeScrolledToTop(page, shape)) {
+            // Means we've scrolled the current page to the top of the visible part of the view.
+            // Only drawing arcs for now
+            paint.setColor(colorInterpolator.getInterpolatedShade());
+
+            drawSpiralShape(canvas, getCommonShapeBoundingRect(page, shape, true),
+                    spiralInterpolator, paint);
+        } else {
+            colorInterpolator.updateValue(getContentBoundsBottom() - page.getYPosition());
+            spiralInterpolator.updateValue(getContentBoundsBottom() - page.getYPosition());
+            paint.setColor(colorInterpolator.getInterpolatedShade());
+
+            drawSpiralShape(canvas, getCommonShapeBoundingRect(page, shape, false),
+                    spiralInterpolator, paint);
+        }
+    }
+
+    private void drawSpiralShape(Canvas canvas, RectF bounds, SpiralInterpolator interpolator,
+            Paint paint) {
+        Path path = new Path();
+        List<SpiralSegment> segments = interpolator.getSegments();
+        if (segments == null || segments.isEmpty()) {
+            return;
+        }
+
+        for (SpiralSegment segment : segments) {
+            if (segment.getType() == SpiralSegment.Type.TOP) {
+                addTopSpiralSegment(path, bounds, segment);
+            } else {
+                addBottomSpiralSegment(path, bounds, segment);
+            }
+        }
+
+        canvas.drawPath(path, paint);
+    }
+
+    private void addTopSpiralSegment(Path path, RectF bounds, SpiralSegment spiralSegment) {
+        float centerX = bounds.centerX();
+        float centerY = bounds.centerY();
+
+        float segmentBoundsLeft;
+        float segmentBoundsRight;
+        float segmentBoundsTop;
+        float segmentBoundsBottom;
+
+        if (path.isEmpty()) {
+            segmentBoundsLeft = centerX - spiralSegment.getWidth() / 2;
+            segmentBoundsRight = centerX + spiralSegment.getWidth() / 2;
+            segmentBoundsTop = centerY - spiralSegment.getHeight() / 2;
+            segmentBoundsBottom = centerY + spiralSegment.getHeight() / 2;
+        } else {
+            RectF pathBounds = new RectF();
+            path.computeBounds(pathBounds, true);
+
+            segmentBoundsLeft = pathBounds.left;
+            segmentBoundsRight = segmentBoundsLeft + spiralSegment.getWidth();
+            segmentBoundsTop = centerY - spiralSegment.getHeight() / 2;
+            segmentBoundsBottom = centerY + spiralSegment.getHeight() / 2;
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            path.addArc(segmentBoundsLeft, segmentBoundsTop, segmentBoundsRight,
+                    segmentBoundsBottom, 180, 180);
+        }
+    }
+
+    private void addBottomSpiralSegment(Path path, RectF bounds, SpiralSegment spiralSegment) {
+        float centerX = bounds.centerX();
+        float centerY = bounds.centerY();
+
+        float segmentBoundsLeft;
+        float segmentBoundsRight;
+        float segmentBoundsTop;
+        float segmentBoundsBottom;
+
+        if (path.isEmpty()) {
+            segmentBoundsLeft = centerX - spiralSegment.getWidth() / 2;
+            segmentBoundsRight = centerX + spiralSegment.getWidth() / 2;
+            segmentBoundsTop = centerY - spiralSegment.getHeight() / 2;
+            segmentBoundsBottom = centerY + spiralSegment.getHeight() / 2;
+        } else {
+            RectF pathBounds = new RectF();
+            path.computeBounds(pathBounds, true);
+
+            segmentBoundsLeft = pathBounds.right - spiralSegment.getWidth();
+            segmentBoundsRight = pathBounds.right;
+            segmentBoundsTop = centerY - spiralSegment.getHeight() / 2;
+            segmentBoundsBottom = centerY + spiralSegment.getHeight() / 2;
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            path.addArc(segmentBoundsLeft, segmentBoundsTop, segmentBoundsRight,
+                    segmentBoundsBottom, 0, 180);
+        }
+    }
+
+    //endregion
+
+    private RectF getCommonShapeBoundingRect(FlashShapePage page, FlashShape shape,
+            boolean scrolledToTop) {
+        if (scrolledToTop) {
+            float boundingRectTop = getContentBoundsTop() + shape.getYOffset();
+            float boundingRectLeft = page.getXPosition() + shape.getXOffset();
+            float boundingRectRight = boundingRectLeft + mMaxShapeWidth;
+            float boundingRectBottom = boundingRectTop + mMaxShapeHeight;
+
+            return new RectF(boundingRectLeft, boundingRectTop, boundingRectRight,
+                    boundingRectBottom);
+        } else {
+            float boundingRectTop = page.getYPosition() + shape.getYOffset() + getPaddingTop();
+            float boundingRectLeft = page.getXPosition() + shape.getXOffset();
+            float boundingRectRight = boundingRectLeft + mMaxShapeWidth;
+            float boundingRectBottom = boundingRectTop + mMaxShapeWidth;
+
+            return new RectF(boundingRectLeft, boundingRectTop, boundingRectRight,
+                    boundingRectBottom);
         }
     }
 

@@ -79,7 +79,7 @@ public class SpiralInterpolator extends Interpolator {
         for (int i = 0; i < finalSegmentCount; i++) {
             SpiralSegment segment = new SpiralSegment(i % 2 == 0 ? SpiralSegment.Type.BOTTOM :
                     SpiralSegment.Type.TOP);
-            segment.setWidth((i + 1) + mSegmentWidthFactor);
+            segment.setWidth((i + 1) * mSegmentWidthFactor);
             segment.setHeight((i + 1) * mSegmentHeightFactor);
             mSegments.add(segment);
         }
