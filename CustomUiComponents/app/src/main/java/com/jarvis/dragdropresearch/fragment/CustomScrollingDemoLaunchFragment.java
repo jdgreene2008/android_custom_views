@@ -24,7 +24,6 @@ public class CustomScrollingDemoLaunchFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
         view.findViewById(R.id.btn_launch_scrolling_rails).setOnClickListener(Navigation
                 .createNavigateOnClickListener(
                         R.id.action_customScrollingDemoLaunchFragment_to_scrollingRailsViewFragment));

@@ -1,12 +1,13 @@
-package com.jarvis.dragdropresearch.interpolators;
+package com.jarvis.dragdropresearch.funwithshapes;
 
 /**
  * Represents a 180-degree segment of a spiral.
  */
 public class SpiralSegment {
-
+    public static final int SEGMENT_COLOR_DEFAULT = -1;
     private float mHeight;
     private float mWidth;
+    private int mColor = SEGMENT_COLOR_DEFAULT;
     private Type mType;
 
     public SpiralSegment(Type type) {
@@ -35,6 +36,14 @@ public class SpiralSegment {
      */
     public void setWidth(float width) {
         mWidth = width;
+    }
+
+    public int getColor() {
+        return mColor;
+    }
+
+    public void setColor(int color) {
+        mColor = color;
     }
 
     public Type getType() {

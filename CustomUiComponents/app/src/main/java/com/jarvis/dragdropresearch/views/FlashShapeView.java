@@ -12,13 +12,14 @@ import android.util.AttributeSet;
 import com.jarvis.dragdropresearch.funwithshapes.ArcShape;
 import com.jarvis.dragdropresearch.funwithshapes.FlashShape;
 import com.jarvis.dragdropresearch.funwithshapes.RectangleShape;
+import com.jarvis.dragdropresearch.funwithshapes.SpiralArcDescriptor;
+import com.jarvis.dragdropresearch.funwithshapes.SpiralSegment;
 import com.jarvis.dragdropresearch.funwithshapes.SpiralShape;
 import com.jarvis.dragdropresearch.funwithshapes.TriangleShape;
 import com.jarvis.dragdropresearch.interpolators.AngleInterpolator;
 import com.jarvis.dragdropresearch.interpolators.ColorInterpolator;
 import com.jarvis.dragdropresearch.interpolators.RectangleInterpolator;
 import com.jarvis.dragdropresearch.interpolators.SpiralInterpolator;
-import com.jarvis.dragdropresearch.interpolators.SpiralSegment;
 import com.jarvis.dragdropresearch.interpolators.TriangleInterpolator;
 
 import androidx.annotation.NonNull;
@@ -99,7 +100,8 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
             }
 
             ColorInterpolator shapeColorInterpolator = new ColorInterpolator(page.getHeight());
-            shapeColorInterpolator.setColor(SHAPE_COLORS[(i - 1) % SHAPE_COLORS.length]);
+            shapeColorInterpolator
+                    .setColor(SHAPE_COLORS[random.nextInt(500) % SHAPE_COLORS.length]);
             shape.setColorInterpolator(shapeColorInterpolator);
 
             page.setFlashShape(shape);
@@ -129,14 +131,15 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
     }
 
     private SpiralShape getSpiralShape(FlashShapePage page) {
-        Random random = new Random();
         SpiralShape shape = new SpiralShape();
         shape.setXOffset((int)(page.getWidth() / 2 -
                 mMaxShapeWidth / 2));
         shape.setYOffset((int)(page.getHeight() / 2 - mMaxShapeHeight / 2));
+        shape.generateRandomSegmentColors();
 
         SpiralInterpolator interpolator =
                 new SpiralInterpolator(page.getHeight(), (int)mMaxShapeHeight, (int)mMaxShapeWidth);
+        interpolator.setAllowMulticoloredSegments(true);
         shape.setSpiralInterpolator(interpolator);
         return shape;
     }
@@ -423,38 +426,73 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
             // Only drawing arcs for now
             paint.setColor(colorInterpolator.getInterpolatedShade());
 
-            drawSpiralShape(canvas, getCommonShapeBoundingRect(page, shape, true),
+            drawSpiralShape(canvas, shape, getCommonShapeBoundingRect(page, shape, true),
                     spiralInterpolator, paint);
         } else {
             colorInterpolator.updateValue(getContentBoundsBottom() - page.getYPosition());
             spiralInterpolator.updateValue(getContentBoundsBottom() - page.getYPosition());
             paint.setColor(colorInterpolator.getInterpolatedShade());
 
-            drawSpiralShape(canvas, getCommonShapeBoundingRect(page, shape, false),
+            drawSpiralShape(canvas, shape, getCommonShapeBoundingRect(page, shape, false),
                     spiralInterpolator, paint);
         }
     }
 
-    private void drawSpiralShape(Canvas canvas, RectF bounds, SpiralInterpolator interpolator,
+    private void drawSpiralShape(Canvas canvas, SpiralShape shape, RectF bounds,
+            SpiralInterpolator interpolator,
             Paint paint) {
         Path path = new Path();
+        List<SpiralArcDescriptor> arcDescriptors = new ArrayList<>();
         List<SpiralSegment> segments = interpolator.getSegments();
         if (segments == null || segments.isEmpty()) {
             return;
         }
 
-        for (SpiralSegment segment : segments) {
+        // TODO: Populate array of random colors during initial setup to avoid excess
+        // object allocation in onDraw().
+
+        for (int i = 0; i < segments.size(); i++) {
+            final SpiralSegment segment = segments.get(i);
+
+            // Set segment color from poll of available segment colors.
+            if (interpolator.isAllowMulticoloredSegments()) {
+                int[] segmentColors = shape.getSegmentColors();
+                segment.setColor(segmentColors[i % segmentColors.length]);
+            }
+
             if (segment.getType() == SpiralSegment.Type.TOP) {
-                addTopSpiralSegment(path, bounds, segment);
+                addTopSpiralSegment(path, arcDescriptors, bounds, segment);
             } else {
-                addBottomSpiralSegment(path, bounds, segment);
+                addBottomSpiralSegment(path, arcDescriptors, bounds, segment);
             }
         }
 
-        canvas.drawPath(path, paint);
+        final int defaultColor = paint.getColor();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP &&
+                interpolator.isAllowMulticoloredSegments()) {
+            for (int i = 0; i < arcDescriptors.size(); i++) {
+                SpiralArcDescriptor descriptor = arcDescriptors.get(i);
+
+                int selectedColor = segments.get(i).getColor();
+                if (selectedColor != SpiralSegment.SEGMENT_COLOR_DEFAULT) {
+                    paint.setColor(selectedColor);
+                }
+
+                canvas.drawArc(descriptor.getLeft(), descriptor.getTop(), descriptor.getRight(),
+                        descriptor.getBottom(), descriptor.getStartAngle(),
+                        descriptor.getSweepAngle(), false, paint);
+
+                paint.setColor(defaultColor);
+            }
+        } else {
+            canvas.drawPath(path, paint);
+        }
     }
 
-    private void addTopSpiralSegment(Path path, RectF bounds, SpiralSegment spiralSegment) {
+    private void addTopSpiralSegment(Path path,
+            List<SpiralArcDescriptor> arcDescriptors,
+            RectF bounds, SpiralSegment spiralSegment) {
         float centerX = bounds.centerX();
         float centerY = bounds.centerY();
 
@@ -478,13 +516,18 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
             segmentBoundsBottom = centerY + spiralSegment.getHeight() / 2;
         }
 
+        arcDescriptors.add(new SpiralArcDescriptor(segmentBoundsLeft, segmentBoundsTop,
+                segmentBoundsBottom, segmentBoundsRight, 180,
+                180));
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             path.addArc(segmentBoundsLeft, segmentBoundsTop, segmentBoundsRight,
                     segmentBoundsBottom, 180, 180);
         }
     }
 
-    private void addBottomSpiralSegment(Path path, RectF bounds, SpiralSegment spiralSegment) {
+    private void addBottomSpiralSegment(Path path,
+            List<SpiralArcDescriptor> arcDescriptors,
+            RectF bounds, SpiralSegment spiralSegment) {
         float centerX = bounds.centerX();
         float centerY = bounds.centerY();
 
@@ -508,6 +551,9 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
             segmentBoundsBottom = centerY + spiralSegment.getHeight() / 2;
         }
 
+        arcDescriptors.add(new SpiralArcDescriptor(segmentBoundsLeft, segmentBoundsTop,
+                segmentBoundsBottom, segmentBoundsRight, 0,
+                180));
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             path.addArc(segmentBoundsLeft, segmentBoundsTop, segmentBoundsRight,
                     segmentBoundsBottom, 0, 180);

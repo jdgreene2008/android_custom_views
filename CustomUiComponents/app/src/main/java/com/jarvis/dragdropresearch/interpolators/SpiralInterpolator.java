@@ -1,9 +1,12 @@
 package com.jarvis.dragdropresearch.interpolators;
 
+import com.jarvis.dragdropresearch.funwithshapes.SpiralSegment;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class SpiralInterpolator extends Interpolator {
+    public static final int MAX_SEGMENT_COUNT = 80;
     /**
      * Represents the number of 180-degree arc segments in this spiral
      * when counting clockwise starting at the 3-o'clock position.
@@ -20,6 +23,8 @@ public class SpiralInterpolator extends Interpolator {
     private float mSegmentWidthFactor;
     private float mSegmentHeightFactor;
 
+    private boolean mAllowMulticoloredSegments;
+
     private List<SpiralSegment> mSegments = new ArrayList<>();
 
     public SpiralInterpolator(int maxValue, int maxSegmentCount, float maxSegmentHeight,
@@ -31,7 +36,10 @@ public class SpiralInterpolator extends Interpolator {
         mSegmentHeightWidthRatio = mMaxSegmentHeight / mMaxSegmentWidth;
 
         // TODO: Move this code to builder.
-        mSegmentWidthFactor = mMaxSegmentWidth / maxSegmentCount;
+        final int finalSegmentCount =
+                maxSegmentCount < 1 || maxSegmentCount > MAX_SEGMENT_COUNT ? 1 :
+                        maxSegmentCount;
+        mSegmentWidthFactor = mMaxSegmentWidth / finalSegmentCount;
         mSegmentHeightFactor = mSegmentHeightWidthRatio * mSegmentWidthFactor;
     }
 
@@ -61,6 +69,18 @@ public class SpiralInterpolator extends Interpolator {
 
     public void setMaxSegmentWidth(float maxSegmentWidth) {
         mMaxSegmentWidth = maxSegmentWidth;
+    }
+
+    public boolean isAllowMulticoloredSegments() {
+        return mAllowMulticoloredSegments;
+    }
+
+    /**
+     * @param allowMulticoloredSegments Set to true if individual segment colors should be respected.
+     * If false,the default color used to draw the spiral will be used for all segments.
+     */
+    public void setAllowMulticoloredSegments(boolean allowMulticoloredSegments) {
+        mAllowMulticoloredSegments = allowMulticoloredSegments;
     }
 
     public List<SpiralSegment> getSegments() {
