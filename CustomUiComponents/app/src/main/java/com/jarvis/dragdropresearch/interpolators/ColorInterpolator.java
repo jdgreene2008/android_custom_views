@@ -34,6 +34,6 @@ public class ColorInterpolator extends Interpolator {
      */
     public int getInterpolatedShade() {
         return ColorUtils.setAlphaComponent(mColor,
-                (int)(getInterpolatedValue() * 255));
+                (int)(getInterpolation() * 255));
     }
 }

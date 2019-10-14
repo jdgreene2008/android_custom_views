@@ -29,6 +29,6 @@ public class AlphaInterpolator extends Interpolator {
      * full opaqueness and 0 representing full transparency.
      */
     public int getInterpolatedAlpha() {
-        return (int)(255 * getInterpolatedValue());
+        return (int)(255 * getInterpolation());
     }
 }

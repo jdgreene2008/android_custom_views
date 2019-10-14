@@ -81,8 +81,8 @@ public class RectangleInterpolator extends Interpolator {
     }
 
     public float[] getInterpolatedDimensions() {
-        float interpolatedWidth = getInterpolatedValue() * mWidth;
-        float interpolatedHeight = getInterpolatedValue() * mHeight;
+        float interpolatedWidth = getInterpolation() * mWidth;
+        float interpolatedHeight = getInterpolation() * mHeight;
 
         mInterpolatedDimensions[INTERPOLATION_VALUES_WIDTH] = interpolatedWidth;
         mInterpolatedDimensions[INTERPOLATION_VALUES_HEIGHT] = interpolatedHeight;

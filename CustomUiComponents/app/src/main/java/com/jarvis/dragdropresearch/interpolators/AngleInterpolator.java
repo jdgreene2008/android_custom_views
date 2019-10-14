@@ -22,6 +22,6 @@ public class AngleInterpolator extends Interpolator {
     }
 
     public float getInterpolatedAngle() {
-        return getInterpolatedValue() * mMaxAngle;
+        return getInterpolation() * mMaxAngle;
     }
 }

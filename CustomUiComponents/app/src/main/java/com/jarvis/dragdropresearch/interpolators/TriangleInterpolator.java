@@ -104,13 +104,13 @@ public class TriangleInterpolator extends Interpolator {
     public float[] getInterpolatedValues() {
 
         if (mInterpolateOnAltitude) {
-            float interpolatedAltitude = getInterpolatedValue() * mAltitude;
+            float interpolatedAltitude = getInterpolation() * mAltitude;
             float interpolatedBase = (interpolatedAltitude * mBase) / mAltitude;
 
             mInterpolatedValues[INTERPOLATION_VALUES_BASE] = interpolatedBase;
             mInterpolatedValues[INTERPOLATION_VALUES_ALTITUDE] = interpolatedAltitude;
         } else {
-            float interpolatedBase = getInterpolatedValue() * mBase;
+            float interpolatedBase = getInterpolation() * mBase;
             float interpolatedAltitude = (mAltitude * interpolatedBase) / mBase;
 
             mInterpolatedValues[INTERPOLATION_VALUES_BASE] = interpolatedBase;
@@ -121,7 +121,7 @@ public class TriangleInterpolator extends Interpolator {
     }
 
     private int calculateAltitudeForInterpolatedBase() {
-        float interpolatedBase = (int)(getInterpolatedValue() * mBase);
+        float interpolatedBase = (int)(getInterpolation() * mBase);
         return (int)((mAltitude * interpolatedBase) / mBase);
     }
 }

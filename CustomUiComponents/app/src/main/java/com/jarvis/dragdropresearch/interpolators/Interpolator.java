@@ -6,7 +6,7 @@ public class Interpolator {
 
     private int mValue;
 
-    private float mInterpolatedValue;
+    private float mInterpolation;
 
     public Interpolator(int maxValue) {
         this.mMaxValue = maxValue;
@@ -24,10 +24,6 @@ public class Interpolator {
         return mMaxValue;
     }
 
-    public void setInterpolatedValue(float interpolatedValue) {
-        mInterpolatedValue = interpolatedValue;
-    }
-
     public void updateValue(int value) {
         mValue = value;
         calculateInterpolatedValue();
@@ -35,15 +31,15 @@ public class Interpolator {
 
     private void calculateInterpolatedValue() {
         if (mValue >= mMaxValue) {
-            mInterpolatedValue = 1.0f;
+            mInterpolation = 1.0f;
         } else if (mMaxValue <= 0) {
-            mInterpolatedValue = 0f;
+            mInterpolation = 0f;
         } else {
-            mInterpolatedValue = ((float)Math.abs(mValue) / (float)mMaxValue);
+            mInterpolation = ((float)Math.abs(mValue) / (float)mMaxValue);
         }
     }
 
-    public float getInterpolatedValue() {
-        return mInterpolatedValue;
+    public float getInterpolation() {
+        return mInterpolation;
     }
 }
