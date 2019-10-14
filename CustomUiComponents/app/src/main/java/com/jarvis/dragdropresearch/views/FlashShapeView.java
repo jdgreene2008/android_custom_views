@@ -43,16 +43,19 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
 
     public FlashShapeView(@NonNull Context context) {
         super(context);
+        setLayerType(LAYER_TYPE_SOFTWARE, null);
     }
 
     public FlashShapeView(@NonNull Context context,
             @Nullable AttributeSet attrs) {
         super(context, attrs);
+        setLayerType(LAYER_TYPE_SOFTWARE, null);
     }
 
     public FlashShapeView(@NonNull Context context, @Nullable AttributeSet attrs,
             int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        setLayerType(LAYER_TYPE_SOFTWARE, null);
     }
 
     @Override
@@ -162,6 +165,12 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
         angleInterpolator.setMaxAngle(360.0f);
         shape.setAngleInterpolator(angleInterpolator);
         return shape;
+    }
+
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        setupPages();
     }
 
     @Override
