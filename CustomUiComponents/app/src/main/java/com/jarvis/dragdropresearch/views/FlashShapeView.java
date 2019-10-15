@@ -5,6 +5,8 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.RectF;
 import android.os.Build;
 import android.util.AttributeSet;
@@ -227,6 +229,7 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
 
         Paint paint = new Paint();
         paint.setStyle(Paint.Style.FILL);
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER));
         ColorInterpolator colorInterpolator = shape.getColorInterpolator();
         AngleInterpolator angleInterpolator = shape.getAngleInterpolator();
 
@@ -258,6 +261,7 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
 
         Paint paint = new Paint();
         paint.setStyle(Paint.Style.FILL);
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER));
         ColorInterpolator colorInterpolator = shape.getColorInterpolator();
         RectangleInterpolator rectangleInterpolator = shape.getRectangleInterpolator();
 
@@ -339,6 +343,8 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
 
         Paint paint = new Paint();
         paint.setStyle(Paint.Style.FILL);
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER));
+
         ColorInterpolator colorInterpolator = shape.getColorInterpolator();
         TriangleInterpolator triangleInterpolator = shape.getTriangleInterpolator();
 
@@ -417,6 +423,7 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
 
         Paint paint = new Paint();
         paint.setStyle(Paint.Style.STROKE);
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER));
         paint.setStrokeWidth(10);
         ColorInterpolator colorInterpolator = shape.getColorInterpolator();
         SpiralInterpolator spiralInterpolator = shape.getSpiralInterpolator();
@@ -442,6 +449,8 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
             SpiralInterpolator interpolator,
             Paint paint) {
         Path path = new Path();
+
+
         List<SpiralArcDescriptor> arcDescriptors = new ArrayList<>();
         List<SpiralSegment> segments = interpolator.getSegments();
         if (segments == null || segments.isEmpty()) {
@@ -451,12 +460,12 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
         // TODO: Populate array of random colors during initial setup to avoid excess
         // object allocation in onDraw().
 
+        final int[] segmentColors = shape.getSegmentColors();
         for (int i = 0; i < segments.size(); i++) {
             final SpiralSegment segment = segments.get(i);
 
             // Set segment color from poll of available segment colors.
             if (interpolator.isAllowMulticoloredSegments()) {
-                int[] segmentColors = shape.getSegmentColors();
                 segment.setColor(segmentColors[i % segmentColors.length]);
             }
 

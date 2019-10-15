@@ -8,8 +8,7 @@ import java.util.Random;
 
 public class SpiralShape extends FlashShape {
     private static final int[] SEGMENT_COLOR_POOL_DEFAULT =
-            new int[] {Color.RED, Color.WHITE, Color.BLUE, Color.GREEN,
-                    Color.YELLOW};
+            new int[] {Color.RED,Color.BLUE};
 
     private SpiralInterpolator mSpiralInterpolator;
     private int[] mSegmentColors;
