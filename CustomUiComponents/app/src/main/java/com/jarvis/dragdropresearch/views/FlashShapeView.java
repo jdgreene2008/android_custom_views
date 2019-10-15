@@ -34,9 +34,9 @@ import java.util.Random;
 public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
 
     private static final String TAG = FlashShapeView.class.getName();
-    private static final int PAGE_COUNT = 30;
+    private static final int PAGE_COUNT = 50;
     private static final int[] COLORS_BACKGROUNDS =
-            new int[] {Color.CYAN, Color.LTGRAY, Color.BLACK};
+            new int[] {Color.LTGRAY, Color.BLACK};
     private static final int[] SHAPE_COLORS =
             new int[] {Color.RED, Color.WHITE, Color.BLUE, Color.GREEN,
                     Color.YELLOW};
