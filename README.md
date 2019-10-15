@@ -36,6 +36,10 @@ The below shows the CustomScrollingView.java custom UI component in action. The 
 ### Spiral Drawing ###
 ![FlashShapesView-Mini Window](/images/spiral_drawing.gif)
 
+### Multicolored Spiral Drawing ###
+![FlashShapesView-Spiral](/images/flash_shape_view_multi_colored_spiral.gif)
+
+
 
 
 
