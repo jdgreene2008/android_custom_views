@@ -4,11 +4,10 @@ import android.graphics.Color;
 
 import com.jarvis.dragdropresearch.interpolators.AlphaInterpolator;
 import com.jarvis.dragdropresearch.interpolators.ColorInterpolator;
-import com.jarvis.dragdropresearch.interpolators.SpiralInterpolator;
 
 import java.util.Random;
 
-public class FlashShape {
+public abstract class FlashShape {
     private static final int[] COMPONENT_COLOR_POOL_DEFAULT =
             new int[] {Color.RED, Color.GREEN};
 
@@ -22,20 +21,19 @@ public class FlashShape {
 
     private AlphaInterpolator mAlphaInterpolator;
 
-    protected int[] mComponentColors;
+    private boolean mAllowMulticoloredComponents;
 
-    private int[] mComponentColorPool;
+    private int[] mComponentColors;
 
-    public FlashShape(Type type) {
+    private int[] mComponentColorPool = COMPONENT_COLOR_POOL_DEFAULT;
+
+    FlashShape(Type type) {
         mType = type;
+        mComponentColors = mComponentColorPool;
     }
 
     public Type getType() {
         return mType;
-    }
-
-    public void setType(Type type) {
-        mType = type;
     }
 
     public int getXOffset() {
@@ -72,10 +70,28 @@ public class FlashShape {
     }
 
     /**
+     * @return Maximum number of components that this shape can be composed of.
+     */
+    abstract public int getMaxComponents();
+
+    public boolean allowMultiColoredComponents() {
+        return mAllowMulticoloredComponents;
+    }
+
+    /**
+     * @param allowMulticoloredComponents Set to true if individual segment colors should be respected.
+     * If false,the default color used to draw the spiral will be used for all segments.
+     */
+    public void setAllowMulticoloredComponents(boolean allowMulticoloredComponents) {
+        mAllowMulticoloredComponents = allowMulticoloredComponents;
+    }
+
+    /**
      * @param componentColorPool Array of colors to be used in conjunction with
-     * {@link SpiralShape#generateRandomSegmentColors()}. If null or the length is
+     * {@link SpiralShape#generateRandomComponentColors()}. If null or the length is
      * equal to 0, the default color pool will be used.
-     * @see  #COMPONENT_COLOR_POOL_DEFAULT
+     *
+     * @see #COMPONENT_COLOR_POOL_DEFAULT
      */
     public void setComponentColorPool(int[] componentColorPool) {
         if (componentColorPool != null && componentColorPool.length > 0) {
@@ -86,11 +102,11 @@ public class FlashShape {
     }
 
     /**
-     * Generate a random array of colors of size {@link SpiralInterpolator#MAX_SEGMENT_COUNT}.
+     * Generate a random array of colors of size.
      * This array will be used to color the segments, with array[i] coloring segment[i].
      */
-    public void generateRandomSegmentColors() {
-        mComponentColors = new int[SpiralInterpolator.MAX_SEGMENT_COUNT];
+    public void generateRandomComponentColors() {
+        mComponentColors = new int[getMaxComponents()];
 
         final Random random = new Random(System.currentTimeMillis());
         for (int i = 0; i < mComponentColors.length; i++) {

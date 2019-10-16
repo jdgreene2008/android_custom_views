@@ -3,6 +3,7 @@ package com.jarvis.dragdropresearch.funwithshapes;
 import com.jarvis.dragdropresearch.interpolators.RectangleInterpolator;
 
 public class RectangleShape extends FlashShape {
+    private static final int MAX_COMPONENT_COUNT = 4;
 
     private RectangleInterpolator mRectangleInterpolator;
 
@@ -21,5 +22,10 @@ public class RectangleShape extends FlashShape {
     public void setRectangleInterpolator(
             RectangleInterpolator rectangleInterpolator) {
         mRectangleInterpolator = rectangleInterpolator;
+    }
+
+    @Override
+    public int getMaxComponents() {
+        return MAX_COMPONENT_COUNT;
     }
 }

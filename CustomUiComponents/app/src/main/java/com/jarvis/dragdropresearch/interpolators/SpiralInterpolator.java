@@ -6,14 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SpiralInterpolator extends Interpolator {
-    public static final int MAX_SEGMENT_COUNT = 80;
-    /**
-     * Represents the number of 180-degree arc segments in this spiral
-     * when counting clockwise starting at the 3-o'clock position.
-     */
-    public static final int DEFAULT_SEGMENT_COUNT = 40;
-
-    private int mSegmentMax = DEFAULT_SEGMENT_COUNT;
 
     private float mMaxSegmentHeight;
     private float mMaxSegmentWidth;
@@ -27,8 +19,8 @@ public class SpiralInterpolator extends Interpolator {
 
     private List<SpiralSegment> mSegments = new ArrayList<>();
 
-    public SpiralInterpolator(int maxValue, int maxSegmentCount, float maxSegmentHeight,
-            float maxSegmentWidth) {
+    public SpiralInterpolator(int maxValue, float maxSegmentHeight,
+            float maxSegmentWidth, int maxSegmentCount) {
         super(maxValue);
         mMaxSegmentWidth = maxSegmentWidth;
         mMaxSegmentHeight = maxSegmentHeight;
@@ -36,51 +28,13 @@ public class SpiralInterpolator extends Interpolator {
         mSegmentHeightWidthRatio = mMaxSegmentHeight / mMaxSegmentWidth;
 
         // TODO: Move this code to builder.
-        final int finalSegmentCount =
-                maxSegmentCount < 1 || maxSegmentCount > MAX_SEGMENT_COUNT ? 1 :
-                        maxSegmentCount;
+        final int finalSegmentCount = maxSegmentCount < 1 ? 1 : maxSegmentCount;
         mSegmentWidthFactor = mMaxSegmentWidth / finalSegmentCount;
         mSegmentHeightFactor = mSegmentHeightWidthRatio * mSegmentWidthFactor;
     }
 
     public SpiralInterpolator(int maxValue, int maxSegmentHeight, int maxSegmentWidth) {
-        this(maxValue, DEFAULT_SEGMENT_COUNT, maxSegmentHeight, maxSegmentWidth);
-    }
-
-    public int getSegmentMax() {
-        return mSegmentMax;
-    }
-
-    public void setSegmentMax(int segmentMax) {
-        mSegmentMax = segmentMax;
-    }
-
-    public float getMaxSegmentHeight() {
-        return mMaxSegmentHeight;
-    }
-
-    public void setMaxSegmentHeight(float maxSegmentHeight) {
-        mMaxSegmentHeight = maxSegmentHeight;
-    }
-
-    public float getMaxSegmentWidth() {
-        return mMaxSegmentWidth;
-    }
-
-    public void setMaxSegmentWidth(float maxSegmentWidth) {
-        mMaxSegmentWidth = maxSegmentWidth;
-    }
-
-    public boolean isAllowMulticoloredSegments() {
-        return mAllowMulticoloredSegments;
-    }
-
-    /**
-     * @param allowMulticoloredSegments Set to true if individual segment colors should be respected.
-     * If false,the default color used to draw the spiral will be used for all segments.
-     */
-    public void setAllowMulticoloredSegments(boolean allowMulticoloredSegments) {
-        mAllowMulticoloredSegments = allowMulticoloredSegments;
+        this(maxValue, maxSegmentHeight, maxSegmentWidth, 1);
     }
 
     public List<SpiralSegment> getSegments() {
@@ -91,7 +45,8 @@ public class SpiralInterpolator extends Interpolator {
 
         // Ensure that width or height are not out of bounds of the max.
         while (finalSegmentCount <= segmentCount &&
-                finalSegmentCount * mSegmentHeightFactor <= mMaxSegmentHeight) {
+                finalSegmentCount * mSegmentHeightFactor <= mMaxSegmentHeight
+                && finalSegmentCount * mSegmentWidthFactor < mMaxSegmentWidth) {
             finalSegmentCount++;
         }
 

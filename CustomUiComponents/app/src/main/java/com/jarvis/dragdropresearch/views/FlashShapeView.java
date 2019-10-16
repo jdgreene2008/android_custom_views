@@ -138,11 +138,14 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
         shape.setXOffset((int)(page.getWidth() / 2 -
                 mMaxShapeWidth / 2));
         shape.setYOffset((int)(page.getHeight() / 2 - mMaxShapeHeight / 2));
-        shape.generateRandomSegmentColors();
+        shape.generateRandomComponentColors();
+        shape.setAllowMulticoloredComponents(true);
+
+        Random random = new Random(System.currentTimeMillis());
 
         SpiralInterpolator interpolator =
-                new SpiralInterpolator(page.getHeight(), (int)mMaxShapeHeight, (int)mMaxShapeWidth);
-        interpolator.setAllowMulticoloredSegments(true);
+                new SpiralInterpolator(page.getHeight(), (int)mMaxShapeHeight, (int)mMaxShapeWidth,
+                        1 + random.nextInt(300) % shape.getMaxComponents());
         shape.setSpiralInterpolator(interpolator);
         return shape;
     }
@@ -153,6 +156,8 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
         shape.setXOffset((int)(page.getWidth() / 2 -
                 mMaxShapeWidth / 2));
         shape.setYOffset((int)(page.getHeight() / 2 - mMaxShapeHeight / 2));
+        shape.setAllowMulticoloredComponents(random.nextInt(300) % 10 < 5);
+        shape.generateRandomComponentColors();
 
         RectangleInterpolator interpolator =
                 new RectangleInterpolator(page.getHeight(), mMaxShapeHeight, mMaxShapeWidth,
@@ -274,7 +279,7 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
             // Draw the rectangle.
             paint.setColor(colorInterpolator.getInterpolatedShade());
 
-            drawRectangleShape(canvas, getCommonShapeBoundingRect(page, shape, true),
+            drawRectangleShape(canvas, shape, getCommonShapeBoundingRect(page, shape, true),
                     rectangleInterpolator, paint);
         } else {
             colorInterpolator.updateValue(getContentBoundsBottom() - page.getYPosition());
@@ -283,12 +288,12 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
             // Draw the rectangle
             paint.setColor(colorInterpolator.getInterpolatedShade());
 
-            drawRectangleShape(canvas, getCommonShapeBoundingRect(page, shape, false),
+            drawRectangleShape(canvas, shape, getCommonShapeBoundingRect(page, shape, false),
                     rectangleInterpolator, paint);
         }
     }
 
-    private void drawRectangleShape(Canvas canvas, RectF bounds,
+    private void drawRectangleShape(Canvas canvas, RectangleShape shape, RectF bounds,
             RectangleInterpolator interpolator, Paint paint) {
         float[] interpolatedDimensions = interpolator.getInterpolatedDimensions();
         float interpolatedWidth =
@@ -304,12 +309,18 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
 
             canvas.drawRect(left, top, right, bottom, paint);
         } else {
+            int[] componentColors = shape.getComponentColors();
+            boolean allowMultiColoredComponents = shape.allowMultiColoredComponents();
+
             // Bottom Left Rectangle
             float top = bounds.bottom - interpolatedHeight;
             float bottom = bounds.bottom;
             float left = bounds.left;
             float right = left + interpolatedWidth;
 
+            if (allowMultiColoredComponents) {
+                paint.setColor(componentColors[0 % componentColors.length]);
+            }
             canvas.drawRect(left, top, right, bottom, paint);
 
             // Bottom Right Rectangle
@@ -318,6 +329,9 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
             left = bounds.right - interpolatedWidth;
             right = bounds.right;
 
+            if (allowMultiColoredComponents) {
+                paint.setColor(componentColors[1 % componentColors.length]);
+            }
             canvas.drawRect(left, top, right, bottom, paint);
 
             // Top Left Rectangle
@@ -326,6 +340,9 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
             left = bounds.left;
             right = bounds.left + interpolatedWidth;
 
+            if (allowMultiColoredComponents) {
+                paint.setColor(componentColors[2 % componentColors.length]);
+            }
             canvas.drawRect(left, top, right, bottom, paint);
 
             // Top Right Rectangle
@@ -334,6 +351,9 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
             left = bounds.right - interpolatedWidth;
             right = bounds.right;
 
+            if (allowMultiColoredComponents) {
+                paint.setColor(componentColors[3 % componentColors.length]);
+            }
             canvas.drawRect(left, top, right, bottom, paint);
         }
     }
@@ -461,14 +481,8 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
         // TODO: Populate array of random colors during initial setup to avoid excess
         // object allocation in onDraw().
 
-        final int[] segmentColors = shape.getComponentColors();
         for (int i = 0; i < segments.size(); i++) {
             final SpiralSegment segment = segments.get(i);
-
-            // Set segment color from poll of available segment colors.
-            if (interpolator.isAllowMulticoloredSegments()) {
-                segment.setColor(segmentColors[i % segmentColors.length]);
-            }
 
             if (segment.getType() == SpiralSegment.Type.TOP) {
                 addTopSpiralSegment(path, arcDescriptors, bounds, segment);
@@ -479,16 +493,18 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
 
         final int defaultColor = paint.getColor();
 
+        final int[] segmentColors = shape.getComponentColors();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP &&
-                interpolator.isAllowMulticoloredSegments()) {
+                shape.allowMultiColoredComponents()) {
             for (int i = 0; i < arcDescriptors.size(); i++) {
                 SpiralArcDescriptor descriptor = arcDescriptors.get(i);
 
-                int selectedColor = segments.get(i).getColor();
-                if (selectedColor != SpiralSegment.SEGMENT_COLOR_DEFAULT) {
-                    paint.setColor(selectedColor);
+                // Set segment color from poll of available segment colors.
+                int segmentColor = segmentColors[i % segmentColors.length];
+                if (shape.allowMultiColoredComponents() &&
+                        segmentColor != SpiralSegment.SEGMENT_COLOR_DEFAULT) {
+                    paint.setColor(segmentColor);
                 }
-
                 canvas.drawArc(descriptor.getLeft(), descriptor.getTop(), descriptor.getRight(),
                         descriptor.getBottom(), descriptor.getStartAngle(),
                         descriptor.getSweepAngle(), false, paint);

@@ -3,6 +3,7 @@ package com.jarvis.dragdropresearch.funwithshapes;
 import com.jarvis.dragdropresearch.interpolators.TriangleInterpolator;
 
 public class TriangleShape extends FlashShape {
+    private static final int MAX_COMPONENT_COUNT = 35;
 
     private int mBase;
 
@@ -43,5 +44,10 @@ public class TriangleShape extends FlashShape {
     public void setTriangleInterpolator(
             TriangleInterpolator triangleInterpolator) {
         mTriangleInterpolator = triangleInterpolator;
+    }
+
+    @Override
+    public int getMaxComponents() {
+        return 2;
     }
 }
