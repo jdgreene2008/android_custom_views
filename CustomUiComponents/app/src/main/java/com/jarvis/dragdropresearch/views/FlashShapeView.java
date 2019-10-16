@@ -126,7 +126,8 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
                 mMaxShapeWidth / 2));
         shape.setYOffset((int)(page.getHeight() / 2 - mMaxShapeHeight / 2));
         shape.setComponentColorPool(
-                new int[] {Color.GREEN, Color.MAGENTA, Color.RED, Color.CYAN, Color.YELLOW});
+                new int[] {Color.GREEN, Color.MAGENTA, Color.RED, Color.CYAN, Color.YELLOW,
+                        Color.BLUE});
         shape.generateRandomComponentColors();
         shape.setAllowMulticoloredComponents(true);
 
@@ -154,17 +155,16 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
     }
 
     private RectangleShape getRectangleShape(FlashShapePage page) {
-        Random random = new Random();
         RectangleShape shape = new RectangleShape();
         shape.setXOffset((int)(page.getWidth() / 2 -
                 mMaxShapeWidth / 2));
         shape.setYOffset((int)(page.getHeight() / 2 - mMaxShapeHeight / 2));
-        shape.setAllowMulticoloredComponents(random.nextInt(300) % 10 < 5);
+        shape.setAllowMulticoloredComponents(true);
         shape.generateRandomComponentColors();
 
         RectangleInterpolator interpolator =
                 new RectangleInterpolator(page.getHeight(), mMaxShapeHeight, mMaxShapeWidth,
-                        random.nextInt(500) % 10 < 5);
+                        true);
         shape.setRectangleInterpolator(interpolator);
         return shape;
     }
@@ -174,6 +174,8 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
         shape.setXOffset((int)((page.getWidth() / 2 -
                 mMaxShapeWidth / 2) + getPaddingStart()));
         shape.setYOffset((int)(page.getHeight() / 2 - mMaxShapeHeight / 2 + getPaddingTop()));
+        shape.setAllowMulticoloredComponents(true);
+        shape.generateRandomComponentColors();
 
         AngleInterpolator angleInterpolator = new AngleInterpolator(page.getHeight());
         angleInterpolator.setMaxAngle(360.0f);
@@ -241,7 +243,6 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
         paint.setStyle(Paint.Style.FILL);
         paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER));
         ColorInterpolator colorInterpolator = shape.getColorInterpolator();
-        AngleInterpolator angleInterpolator = shape.getAngleInterpolator();
 
         if (pageShapeScrolledToTop(page, shape)) {
             // Means we've scrolled the current page to the top top of the visible part of the view.
@@ -250,23 +251,57 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
             // Draw the arc
             paint.setColor(colorInterpolator.getInterpolatedShade());
 
-            canvas.drawArc(getCommonShapeBoundingRect(page, shape, true), 0,
-                    angleInterpolator.getInterpolatedAngle(), true, paint);
+            drawArcShape(canvas, shape, getCommonShapeBoundingRect(page, shape, true), paint);
         } else {
             colorInterpolator.updateValue(getContentBoundsBottom() - page.getYPosition());
-            angleInterpolator.updateValue(getContentBoundsBottom() - page.getYPosition());
+            shape.getAngleInterpolator()
+                    .updateValue(getContentBoundsBottom() - page.getYPosition());
 
             // Draw the arc
             paint.setColor(colorInterpolator.getInterpolatedShade());
 
-            canvas.drawArc(getCommonShapeBoundingRect(page, shape, false), 0,
+            drawArcShape(canvas, shape, getCommonShapeBoundingRect(page, shape, false), paint);
+        }
+    }
+
+    private void drawArcShape(Canvas canvas, ArcShape shape, RectF boundingRect, Paint paint) {
+        AngleInterpolator angleInterpolator = shape.getAngleInterpolator();
+        float interpolatedAngle = angleInterpolator.getInterpolatedAngle();
+
+        if (shape.allowMultiColoredComponents()) {
+            // Number of degrees that each component will take up in the arc.
+            float angleFactor = 360.0f / shape.getMaxComponents();
+
+            // Total number of components that makeup the current interpolated angle.
+            int componentCount = (int)Math.floor(interpolatedAngle / angleFactor);
+
+            // Left-over degrees after dividing the interpolated angle by the angle factor.
+            float componentModulus = interpolatedAngle % angleFactor;
+
+            int[] componentColors = shape.getComponentColors();
+
+            float currentStartAngle = 0;
+            for (int i = 0; i < componentCount; i++) {
+                paint.setColor(componentColors[i % componentColors.length]);
+                canvas.drawArc(boundingRect, currentStartAngle,
+                        angleFactor, true, paint);
+                currentStartAngle += angleFactor;
+            }
+
+            if(componentModulus != 0){
+                paint.setColor(componentColors[componentCount % componentColors.length]);
+                canvas.drawArc(boundingRect, currentStartAngle,
+                        componentModulus, true, paint);
+            }
+        } else {
+            canvas.drawArc(boundingRect, 0,
                     angleInterpolator.getInterpolatedAngle(), true, paint);
         }
     }
     //endregion
 
-    // TODO: Move Individual drawing helpers to a utils class.
     //region Rectangle Drawing
+    // TODO: Move Individual drawing helpers to a utils class.
     private void drawRectangleShape(Canvas canvas, FlashShapePage page) {
         RectangleShape shape = (RectangleShape)page.getFlashShape();
 
@@ -379,14 +414,14 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
             // Only drawing arcs for now
             paint.setColor(colorInterpolator.getInterpolatedShade());
 
-            drawTriangleShape(canvas,shape, getCommonShapeBoundingRect(page, shape, true),
+            drawTriangleShape(canvas, shape, getCommonShapeBoundingRect(page, shape, true),
                     triangleInterpolator, paint);
         } else {
             colorInterpolator.updateValue(getContentBoundsBottom() - page.getYPosition());
             triangleInterpolator.updateValue(getContentBoundsBottom() - page.getYPosition());
             paint.setColor(colorInterpolator.getInterpolatedShade());
 
-            drawTriangleShape(canvas,shape, getCommonShapeBoundingRect(page, shape, false),
+            drawTriangleShape(canvas, shape, getCommonShapeBoundingRect(page, shape, false),
                     triangleInterpolator, paint);
         }
     }

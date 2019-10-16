@@ -3,7 +3,7 @@ package com.jarvis.dragdropresearch.funwithshapes;
 import com.jarvis.dragdropresearch.interpolators.AngleInterpolator;
 
 public class ArcShape extends FlashShape {
-    private static final int MAX_COMPONENT_COUNT = 2;
+    private static final int MAX_COMPONENT_COUNT = 10;
 
     private AngleInterpolator mAngleInterpolator;
 
