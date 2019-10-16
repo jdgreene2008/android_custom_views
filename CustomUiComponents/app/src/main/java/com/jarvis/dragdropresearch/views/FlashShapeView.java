@@ -118,6 +118,7 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
                 (getMeasuredHeight() + getPaddingTop() + getPaddingBottom()) * (PAGE_COUNT + 1));
     }
 
+    //region Random FlashShape Generation.
     private TriangleShape getTriangleShape(FlashShapePage page) {
         Random random = new Random();
         TriangleShape shape = new TriangleShape();
@@ -171,6 +172,7 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
         shape.setAngleInterpolator(angleInterpolator);
         return shape;
     }
+    //endregion
 
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
@@ -450,7 +452,6 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
             Paint paint) {
         Path path = new Path();
 
-
         List<SpiralArcDescriptor> arcDescriptors = new ArrayList<>();
         List<SpiralSegment> segments = interpolator.getSegments();
         if (segments == null || segments.isEmpty()) {
@@ -460,7 +461,7 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
         // TODO: Populate array of random colors during initial setup to avoid excess
         // object allocation in onDraw().
 
-        final int[] segmentColors = shape.getSegmentColors();
+        final int[] segmentColors = shape.getComponentColors();
         for (int i = 0; i < segments.size(); i++) {
             final SpiralSegment segment = segments.get(i);
 

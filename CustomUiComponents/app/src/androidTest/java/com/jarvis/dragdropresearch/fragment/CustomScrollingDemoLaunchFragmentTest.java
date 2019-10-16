@@ -23,7 +23,6 @@ public class CustomScrollingDemoLaunchFragmentTest {
     @Test
     public void test_FragmentLaunchDisplaysButtons() {
         setupFragmentScenario(null);
-
         onView(ViewMatchers.withId(R.id.btn_launch_shape_flash_view)).check(ViewAssertions.matches(
                 ViewMatchers.isDisplayed()));
         onView(ViewMatchers.withId(R.id.btn_launch_scrolling_rails)).check(ViewAssertions.matches(
