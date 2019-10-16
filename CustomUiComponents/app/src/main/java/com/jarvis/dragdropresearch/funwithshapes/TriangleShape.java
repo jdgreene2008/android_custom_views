@@ -3,32 +3,11 @@ package com.jarvis.dragdropresearch.funwithshapes;
 import com.jarvis.dragdropresearch.interpolators.TriangleInterpolator;
 
 public class TriangleShape extends FlashShape {
-    private static final int MAX_COMPONENT_COUNT = 35;
-
-    private int mBase;
-
-    private int mAltitude;
 
     private TriangleInterpolator mTriangleInterpolator;
 
     public TriangleShape() {
         super(Type.TRIANGLE);
-    }
-
-    public int getBase() {
-        return mBase;
-    }
-
-    public void setBase(int base) {
-        mBase = base;
-    }
-
-    public int getAltitude() {
-        return mAltitude;
-    }
-
-    public void setAltitude(int altitude) {
-        mAltitude = altitude;
     }
 
     public TriangleInterpolator getTriangleInterpolator() {

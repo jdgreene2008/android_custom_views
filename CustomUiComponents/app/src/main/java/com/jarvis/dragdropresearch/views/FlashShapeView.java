@@ -69,8 +69,8 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
 
     private void setupPages() {
         mPages = new ArrayList<>(PAGE_COUNT);
-        mMaxShapeHeight = (getMeasuredHeight() - getPaddingTop() - getPaddingBottom()) / 2;
-        mMaxShapeWidth = (getMeasuredWidth() - getPaddingStart() - getPaddingEnd()) / 2;
+        mMaxShapeHeight = (getMeasuredHeight() - getPaddingTop() - getPaddingBottom()) / 2f;
+        mMaxShapeWidth = (getMeasuredWidth() - getPaddingStart() - getPaddingEnd()) / 2f;
 
         // Assumes fixed-size pages for now.
         final Random random = new Random(System.currentTimeMillis());
@@ -120,28 +120,31 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
 
     //region Random FlashShape Generation.
     private TriangleShape getTriangleShape(FlashShapePage page) {
-        Random random = new Random();
+        Random random = new Random(System.currentTimeMillis());
         TriangleShape shape = new TriangleShape();
         shape.setXOffset((int)(page.getWidth() / 2 -
                 mMaxShapeWidth / 2));
         shape.setYOffset((int)(page.getHeight() / 2 - mMaxShapeHeight / 2));
+        shape.setComponentColorPool(
+                new int[] {Color.GREEN, Color.MAGENTA, Color.RED, Color.CYAN, Color.YELLOW});
+        shape.generateRandomComponentColors();
+        shape.setAllowMulticoloredComponents(true);
 
         TriangleInterpolator interpolator =
                 new TriangleInterpolator(page.getHeight(), mMaxShapeHeight, mMaxShapeWidth,
-                        random.nextInt(500) % 10 < 5);
+                        true);
         shape.setTriangleInterpolator(interpolator);
         return shape;
     }
 
     private SpiralShape getSpiralShape(FlashShapePage page) {
+        Random random = new Random();
         SpiralShape shape = new SpiralShape();
         shape.setXOffset((int)(page.getWidth() / 2 -
                 mMaxShapeWidth / 2));
         shape.setYOffset((int)(page.getHeight() / 2 - mMaxShapeHeight / 2));
         shape.generateRandomComponentColors();
-        shape.setAllowMulticoloredComponents(true);
-
-        Random random = new Random(System.currentTimeMillis());
+        shape.setAllowMulticoloredComponents(random.nextInt(300) % 10 < 5);
 
         SpiralInterpolator interpolator =
                 new SpiralInterpolator(page.getHeight(), (int)mMaxShapeHeight, (int)mMaxShapeWidth,
@@ -262,6 +265,7 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
     }
     //endregion
 
+    // TODO: Move Individual drawing helpers to a utils class.
     //region Rectangle Drawing
     private void drawRectangleShape(Canvas canvas, FlashShapePage page) {
         RectangleShape shape = (RectangleShape)page.getFlashShape();
@@ -375,24 +379,32 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
             // Only drawing arcs for now
             paint.setColor(colorInterpolator.getInterpolatedShade());
 
-            drawTriangleShape(canvas, getCommonShapeBoundingRect(page, shape, true),
+            drawTriangleShape(canvas,shape, getCommonShapeBoundingRect(page, shape, true),
                     triangleInterpolator, paint);
         } else {
             colorInterpolator.updateValue(getContentBoundsBottom() - page.getYPosition());
             triangleInterpolator.updateValue(getContentBoundsBottom() - page.getYPosition());
             paint.setColor(colorInterpolator.getInterpolatedShade());
 
-            drawTriangleShape(canvas, getCommonShapeBoundingRect(page, shape, false),
+            drawTriangleShape(canvas,shape, getCommonShapeBoundingRect(page, shape, false),
                     triangleInterpolator, paint);
         }
     }
 
-    private void drawTriangleShape(Canvas canvas, RectF bounds,
+    private void drawTriangleShape(Canvas canvas, TriangleShape shape, RectF bounds,
             TriangleInterpolator triangleInterpolator, Paint paint) {
         float baseInterpolation = triangleInterpolator
                 .getInterpolatedValues()[TriangleInterpolator.INTERPOLATION_VALUES_BASE];
         float altitudeInterpolation = triangleInterpolator
                 .getInterpolatedValues()[TriangleInterpolator.INTERPOLATION_VALUES_ALTITUDE];
+        int[] colors = new int[] {paint.getColor(), paint.getColor()};
+
+        if (shape.allowMultiColoredComponents()
+                && triangleInterpolator.isSymmetric()) {
+            int[] componentColors = shape.getComponentColors();
+            colors[0] = shape.getComponentColors()[0 % componentColors.length];
+            colors[1] = shape.getComponentColors()[1 % componentColors.length];
+        }
 
         // *** Construct the Left Triangle ** //
 
@@ -414,6 +426,7 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
         leftTriangle.lineTo(topX, topY);
         leftTriangle.lineTo(bottomLeftX, bottomLeftY);
 
+        paint.setColor(colors[0]);
         canvas.drawPath(leftTriangle, paint);
 
         if (triangleInterpolator.isSymmetric()) {
@@ -434,6 +447,7 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
             rightTriangle.lineTo(topX, topY);
             rightTriangle.lineTo(bottomLeftX, bottomLeftY);
 
+            paint.setColor(colors[1]);
             canvas.drawPath(rightTriangle, paint);
         }
     }
