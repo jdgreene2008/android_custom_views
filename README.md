@@ -27,17 +27,12 @@ The below shows the CustomScrollingView.java custom UI component in action. The 
 *Draw different geometric shapes into view as the user scrolls. The shapes are drawn proportional to the view size so that it scales across any screen sizes.*
 
 ### Large View ###
-![FlashShapesView-Large Window](/images/flash_shape_large_window.gif)
+![FlashShapesView-Large Window](/images/flash_shape_view_large.gif)
 
 
 ### Mini View ###
-![FlashShapesView-Mini Window](/images/flash_shape_mini_window.gif)
+![FlashShapesView-Mini Window](/images/flash_shape_view_small.gif)
 
-### Spiral Drawing ###
-![FlashShapesView-Mini Window](/images/spiral_drawing.gif)
-
-### Multicolored Spiral Drawing ###
-![FlashShapesView-Spiral](/images/flash_shape_view_multi_colored_spiral.gif)
 
 
 
