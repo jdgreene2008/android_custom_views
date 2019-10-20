@@ -101,6 +101,30 @@ public class Line extends Equation {
         return new PointF((a.x + b.x) / 2, (a.y + b.y) / 2);
     }
 
+    /**
+     * @return {@link PointF} containing the x and y values for the unit vector for this line.
+     */
+    public PointF getUnitVector() {
+        if (mType == Type.VERTICAL) {
+            return new PointF(0, 1);
+        } else if (mType == Type.HORIZONTAL) {
+            return new PointF(1, 0);
+        } else {
+            // Pick two random points on the line and determine the unit vector.
+
+            float x1 = 1;
+            float y1 = getY(x1);
+
+            float x2 = 6;
+            float y2 = getY(x2);
+
+            PointF differenceVector = new PointF(x2 - x1, y2 - y1);
+            float magnitude = (float)Math
+                    .sqrt(Math.pow(differenceVector.x, 2) + Math.pow(differenceVector.y, 2));
+            return new PointF(differenceVector.x / magnitude, differenceVector.y / magnitude);
+        }
+    }
+
     @Override
     String getDescription() {
         return DESCRIPTION;

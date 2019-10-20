@@ -227,34 +227,34 @@ public class LineTest {
         assertNull(line.getXIntercept());
         assertEquals(5f, line.getYIntercept(), 0);
 
-        assertTrue(line.containsPoint(new PointF(200,5)));
-        assertTrue(line.containsPoint(new PointF(400,5)));
+        assertTrue(line.containsPoint(new PointF(200, 5)));
+        assertTrue(line.containsPoint(new PointF(400, 5)));
 
         PointF midpoint = line.getMidpoint(new PointF(200, 5), new PointF(400, 5));
         assertNotNull(midpoint);
-        assertEquals(300,midpoint.x,0);
-        assertEquals(5,midpoint.y,0);
+        assertEquals(300, midpoint.x, 0);
+        assertEquals(5, midpoint.y, 0);
 
         midpoint = line.getMidpoint(new PointF(200, 5), new PointF(400, 6));
         assertNull(midpoint);
 
         // Intersection with diagonal line:
         // Test intersection of y = 5 with x = y; Intersection should be (5,5);
-        Line line2 = LineUtils.createLineFromSlopeAndPoint(1f,new PointF(1,1));
+        Line line2 = LineUtils.createLineFromSlopeAndPoint(1f, new PointF(1, 1));
         assertEquals(line2.getType(), Line.Type.DIAGONAL);
 
-        PointF intersection = LineUtils.getPointOfIntersection(line,line2);
+        PointF intersection = LineUtils.getPointOfIntersection(line, line2);
         assertNotNull(intersection);
-        assertEquals(5,intersection.x,0);
-        assertEquals(5,intersection.y,0);
+        assertEquals(5, intersection.x, 0);
+        assertEquals(5, intersection.y, 0);
 
         // Intersection with vertical line x = 5. Intersection should be (5,5)
-        line2 = LineUtils.createLineFromSlopeAndPoint(null,new PointF(5,20));
+        line2 = LineUtils.createLineFromSlopeAndPoint(null, new PointF(5, 20));
         assertNotNull(line2);
         assertEquals(line2.getType(), Line.Type.VERTICAL);
         assertNull(line2.getSlope());
 
-        intersection = LineUtils.getPointOfIntersection(line,line2);
+        intersection = LineUtils.getPointOfIntersection(line, line2);
         assertNotNull(intersection);
     }
 
@@ -280,7 +280,6 @@ public class LineTest {
         assertEquals(300, midpoint.y, 0);
         assertEquals(5, midpoint.x, 0);
 
-
         // Intersection with diagonal line:
         // Test intersection of y = 5 with x = y; Intersection should be (5,5);
         Line line2 = LineUtils.createLineFromSlopeAndPoint(1f, new PointF(1, 1));
@@ -296,11 +295,73 @@ public class LineTest {
         assertNotNull(line2);
         assertEquals(line2.getType(), Line.Type.HORIZONTAL);
         assertNotNull(line2.getSlope());
-        assertEquals(0f,line2.getSlope(),0f);
+        assertEquals(0f, line2.getSlope(), 0f);
 
         intersection = LineUtils.getPointOfIntersection(line, line2);
         assertNotNull(intersection);
         assertEquals(5, intersection.x, 0);
         assertEquals(5, intersection.y, 0);
+    }
+
+    @Test
+    public void test_unitVector() {
+        // Horizontal line
+        Line.Builder builder = new Line.Builder(Line.Type.HORIZONTAL);
+        builder.setYIntercept(10f);
+        Line line = builder.build();
+        assertNotNull(line);
+        assertEquals(line.getType(), Line.Type.HORIZONTAL);
+        assertNotNull(line.getSlope());
+        assertEquals(line.getSlope(), 0f, 0);
+
+        PointF unitVector = line.getUnitVector();
+        assertEquals(unitVector, new PointF(1.0f, 0f));
+
+        // Vertical line
+        builder = new Line.Builder(Line.Type.VERTICAL);
+        builder.setXIntercept(10f);
+        line = builder.build();
+        assertNotNull(line);
+        assertEquals(line.getType(), Line.Type.VERTICAL);
+        assertNull(line.getSlope());
+
+        unitVector = line.getUnitVector();
+        assertEquals(unitVector, new PointF(0f, 1.0f));
+
+        // Line x = y. Expected unit vector = (1/sqrt(2),1/sqrt(2))
+        builder = new Line.Builder(Line.Type.DIAGONAL);
+        builder.setYIntercept(0f)
+                .setSlope(1f);
+        line = builder.build();
+        assertNotNull(line);
+        assertEquals(line.getType(), Line.Type.DIAGONAL);
+        assertNotNull(line.getSlope());
+
+        PointF expectedValue = new PointF();
+        expectedValue.x = (float)Math.pow(Math.sqrt(2), -1);
+        expectedValue.y = (float)Math.pow(Math.sqrt(2), -1);
+
+        unitVector = line.getUnitVector();
+
+        assertEquals(expectedValue.x,unitVector.x,0.01);
+        assertEquals(expectedValue.y, unitVector.y, 0.01);
+
+        // Line y = 2x. Expected unit vector (1/sqrt(5),2/sqrt(5))
+        builder = new Line.Builder(Line.Type.DIAGONAL);
+        builder.setYIntercept(0f)
+                .setSlope(2f);
+        line = builder.build();
+        assertNotNull(line);
+        assertEquals(line.getType(), Line.Type.DIAGONAL);
+        assertNotNull(line.getSlope());
+
+        expectedValue = new PointF();
+        expectedValue.x = (float)Math.pow(Math.sqrt(5), -1);
+        expectedValue.y = (float)((float) 2 * (Math.pow(Math.sqrt(5), -1)));
+
+        unitVector = line.getUnitVector();
+
+        assertEquals(expectedValue.x, unitVector.x, 0.01);
+        assertEquals(expectedValue.y, unitVector.y, 0.01);
     }
 }
