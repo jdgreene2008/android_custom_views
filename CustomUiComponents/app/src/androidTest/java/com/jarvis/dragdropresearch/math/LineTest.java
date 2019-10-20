@@ -257,4 +257,50 @@ public class LineTest {
         intersection = LineUtils.getPointOfIntersection(line,line2);
         assertNotNull(intersection);
     }
+
+    @Test
+    public void test_verticalLine() {
+        Line.Builder builder = new Line.Builder(Line.Type.VERTICAL);
+
+        // Line x = 5;
+        builder.setXIntercept(5F);
+        Line line = builder.build();
+
+        assertNotNull(line);
+        assertEquals(line.getType(), Line.Type.VERTICAL);
+        assertNull(line.getSlope());
+        assertNull(line.getYIntercept());
+        assertEquals(5f, line.getXIntercept(), 0);
+
+        assertTrue(line.containsPoint(new PointF(5, 200)));
+        assertTrue(line.containsPoint(new PointF(5, 400)));
+
+        PointF midpoint = line.getMidpoint(new PointF(5, 200), new PointF(5, 400));
+        assertNotNull(midpoint);
+        assertEquals(300, midpoint.y, 0);
+        assertEquals(5, midpoint.x, 0);
+
+
+        // Intersection with diagonal line:
+        // Test intersection of y = 5 with x = y; Intersection should be (5,5);
+        Line line2 = LineUtils.initLineWithSlopeAndPoint(1f, new PointF(1, 1));
+        assertEquals(line2.getType(), Line.Type.DIAGONAL);
+
+        PointF intersection = LineUtils.getPointOfIntersection(line, line2);
+        assertNotNull(intersection);
+        assertEquals(5, intersection.x, 0);
+        assertEquals(5, intersection.y, 0);
+
+        // Intersection with horizontal line y = 5. Intersection should be (5,5)
+        line2 = LineUtils.initLineWithSlopeAndPoint(0f, new PointF(5, 5));
+        assertNotNull(line2);
+        assertEquals(line2.getType(), Line.Type.HORIZONTAL);
+        assertNotNull(line2.getSlope());
+        assertEquals(0f,line2.getSlope(),0f);
+
+        intersection = LineUtils.getPointOfIntersection(line, line2);
+        assertNotNull(intersection);
+        assertEquals(5, intersection.x, 0);
+        assertEquals(5, intersection.y, 0);
+    }
 }
