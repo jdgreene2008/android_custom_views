@@ -20,7 +20,7 @@ public final class LineUtils {
      * For vertical lines, the Y coordinate of the point is ignored. For horizontal lines, the x coordinate
      * is ignored.
      */
-    public static Line initLineWithSlopeAndPoint(@Nullable Float slope, PointF point) {
+    public static Line createLineFromSlopeAndPoint(@Nullable Float slope, PointF point) {
         float x = point.x;
         float y = point.y;
         float yIntercept;
@@ -51,7 +51,7 @@ public final class LineUtils {
     }
 
     @Nullable
-    public static Line initLineWithTwoPoints(PointF pointA, PointF pointB) {
+    public static Line createLineFromTwoPoints(PointF pointA, PointF pointB) {
         if (pointA.x == pointB.x && pointA.y == pointB.y) {
             return null;
         } else if (pointA.x == pointB.x && pointA.y != pointB.y) {
