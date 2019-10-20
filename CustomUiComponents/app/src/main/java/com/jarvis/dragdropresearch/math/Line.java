@@ -83,7 +83,7 @@ public class Line extends Equation {
      * @param slope
      * @param point
      */
-    public static Line getLineWithSlopeAndPoint(float slope, PointF point) {
+    public static Line initLineWithSlopeAndPoint(float slope, PointF point) {
         float x = point.x;
         float y = point.y;
         float yIntercept;
@@ -99,7 +99,7 @@ public class Line extends Equation {
     }
 
     @Nullable
-    public static Line getLineWithTwoPoints(PointF pointA, PointF pointB) {
+    public static Line initLineWithTwoPoints(PointF pointA, PointF pointB) {
         if (pointA.x == pointB.x || pointB.y == pointA.y) {
             Log.e(TAG,
                     "Both points share a common X or common Y. Corresponding values should be distinct.");
@@ -118,6 +118,22 @@ public class Line extends Equation {
         }
 
         return new Line(slope, yIntercept);
+    }
+
+    @Nullable
+    public static PointF getPointOfIntersection(Line line1, Line line2) {
+        if (line1 == null || line2 == null) {
+            return null;
+        } else if (line1.getSlope() == line2.getSlope()) {
+            return null;
+        } else {
+            float intersectionX = (line1.getYIntercept() - line2.getYIntercept()) /
+                    (-1 * line1.getSlope() + line2.getSlope());
+            float intersectionY = line1.getYIntercept() + line1.getSlope() *
+                    ((line1.getYIntercept() - line2.getYIntercept()) /
+                            (-1 * line1.getSlope() + line2.getSlope()));
+            return new PointF(intersectionX, intersectionY);
+        }
     }
 
     @Override
