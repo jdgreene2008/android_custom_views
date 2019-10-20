@@ -11,19 +11,17 @@ import static org.junit.Assert.assertTrue;
 
 public class LineTest {
 
-
-
     @Test
-    public void test_initLineWithTwoPoints_samePoints_returnsInvalidLine(){
+    public void test_initLineWithTwoPoints_samePoints_returnsInvalidLine() {
         PointF a = new PointF(1, 1);
-        Line line = Line.initLineWithTwoPoints(a, a);
+        Line line = LineUtils.initLineWithTwoPoints(a, a);
         assertNull(line);
     }
 
     @Test
     public void test_initLineWithTwoPoints_positiveSlope() {
         // Line y = x
-        Line line = Line.initLineWithTwoPoints(new PointF(1, 1), new PointF(2, 2));
+        Line line = LineUtils.initLineWithTwoPoints(new PointF(1, 1), new PointF(2, 2));
 
         assertNotNull(line);
         assertEquals(Line.Type.DIAGONAL, line.getType());
@@ -40,7 +38,7 @@ public class LineTest {
         assertNotNull(line.getMidpoint(new PointF(1, 1), new PointF(5, 5)));
 
         // Line y = 2x - 6;
-        line = Line.initLineWithTwoPoints(new PointF(3, 0), new PointF(10, 14));
+        line = LineUtils.initLineWithTwoPoints(new PointF(3, 0), new PointF(10, 14));
 
         assertNotNull(line);
         assertEquals(Line.Type.DIAGONAL, line.getType());
@@ -59,7 +57,7 @@ public class LineTest {
 
     @Test
     public void test_initLineWithTwoPoints_negativeSlope() {
-        Line line = Line.initLineWithSlopeAndPoint(-1, new PointF(-2, 2));
+        Line line = LineUtils.initLineWithSlopeAndPoint(-1f, new PointF(-2, 2));
 
         // Line y = -x;
         assertNotNull(line);
@@ -81,7 +79,7 @@ public class LineTest {
         assertEquals(0, midpoint.y, 0);
 
         // Line y = -x + 5
-        line = Line.initLineWithTwoPoints(new PointF(0, 5), new PointF(2, 3));
+        line = LineUtils.initLineWithTwoPoints(new PointF(0, 5), new PointF(2, 3));
         assertNotNull(line);
         assertEquals(Line.Type.DIAGONAL, line.getType());
 
@@ -105,7 +103,7 @@ public class LineTest {
     public void test_initLineWithSlopeAndPoint_positiveSlope() {
 
         // Line y = x
-        Line line = Line.initLineWithSlopeAndPoint(1, new PointF(2, 2));
+        Line line = LineUtils.initLineWithSlopeAndPoint(1f, new PointF(2, 2));
 
         assertNotNull(line);
         assertEquals(Line.Type.DIAGONAL, line.getType());
@@ -122,7 +120,7 @@ public class LineTest {
         assertNotNull(line.getMidpoint(new PointF(1, 1), new PointF(5, 5)));
 
         // Line y = 2x - 6;
-        line = Line.initLineWithSlopeAndPoint(2, new PointF(10, 14));
+        line = LineUtils.initLineWithSlopeAndPoint(2f, new PointF(10, 14));
 
         assertNotNull(line);
         assertEquals(Line.Type.DIAGONAL, line.getType());
@@ -141,7 +139,7 @@ public class LineTest {
 
     @Test
     public void test_initLineWithSlopeAndPoint_negativeSlope() {
-        Line line = Line.initLineWithSlopeAndPoint(-1, new PointF(-2, 2));
+        Line line = LineUtils.initLineWithSlopeAndPoint(-1f, new PointF(-2, 2));
 
         // Line y = -x;
         assertNotNull(line);
@@ -163,7 +161,7 @@ public class LineTest {
         assertEquals(0, midpoint.y, 0);
 
         // Line y = -x + 5
-        line = Line.initLineWithSlopeAndPoint(-1, new PointF(2, 3));
+        line = LineUtils.initLineWithSlopeAndPoint(-1f, new PointF(2, 3));
         assertNotNull(line);
         assertEquals(Line.Type.DIAGONAL, line.getType());
 
@@ -191,10 +189,10 @@ public class LineTest {
         Line 2: y = 2.3x+4
          */
 
-        Line line1 = Line.initLineWithSlopeAndPoint(3, new PointF(0, -3));
-        Line line2 = Line.initLineWithSlopeAndPoint(2.3f, new PointF(0, 4));
+        Line line1 = LineUtils.initLineWithSlopeAndPoint(3f, new PointF(0, -3));
+        Line line2 = LineUtils.initLineWithSlopeAndPoint(2.3f, new PointF(0, 4));
 
-        PointF intersection = Line.getPointOfIntersection(line1, line2);
+        PointF intersection = LineUtils.getPointOfIntersection(line1, line2);
         assertNotNull(intersection);
         assertEquals(10, Math.round(intersection.x));
         assertEquals(27, Math.round(intersection.y));
@@ -205,12 +203,58 @@ public class LineTest {
         Line 2 = -0.5x + 7
          */
 
-        line1 = Line.initLineWithSlopeAndPoint(2, new PointF(0, 3));
-        line2 = Line.initLineWithSlopeAndPoint(-0.5f, new PointF(0, 7));
+        line1 = LineUtils.initLineWithSlopeAndPoint(2f, new PointF(0, 3));
+        line2 = LineUtils.initLineWithSlopeAndPoint(-0.5f, new PointF(0, 7));
 
-        intersection = Line.getPointOfIntersection(line1, line2);
+        intersection = LineUtils.getPointOfIntersection(line1, line2);
         assertNotNull(intersection);
         assertEquals(1.6, intersection.x, 0.01);
         assertEquals(6.2, intersection.y, 0.01);
+    }
+
+    @Test
+    public void test_horizontalLine() {
+        Line.Builder builder = new Line.Builder(Line.Type.HORIZONTAL);
+
+        // Line y = 5;
+        builder.setYIntercept(5F);
+        Line line = builder.build();
+
+        assertNotNull(line);
+        assertEquals(line.getType(), Line.Type.HORIZONTAL);
+        assertNotNull(line.getSlope());
+        assertEquals(line.getSlope(), 0, 0);
+        assertNull(line.getXIntercept());
+        assertEquals(5f, line.getYIntercept(), 0);
+
+        assertTrue(line.containsPoint(new PointF(200,5)));
+        assertTrue(line.containsPoint(new PointF(400,5)));
+
+        PointF midpoint = line.getMidpoint(new PointF(200, 5), new PointF(400, 5));
+        assertNotNull(midpoint);
+        assertEquals(300,midpoint.x,0);
+        assertEquals(5,midpoint.y,0);
+
+        midpoint = line.getMidpoint(new PointF(200, 5), new PointF(400, 6));
+        assertNull(midpoint);
+
+        // Intersection with diagonal line:
+        // Test intersection of y = 5 with x = y; Intersection should be (5,5);
+        Line line2 = LineUtils.initLineWithSlopeAndPoint(1f,new PointF(1,1));
+        assertEquals(line2.getType(), Line.Type.DIAGONAL);
+
+        PointF intersection = LineUtils.getPointOfIntersection(line,line2);
+        assertNotNull(intersection);
+        assertEquals(5,intersection.x,0);
+        assertEquals(5,intersection.y,0);
+
+        // Intersection with vertical line x = 5. Intersection should be (5,5)
+        line2 = LineUtils.initLineWithSlopeAndPoint(null,new PointF(5,20));
+        assertNotNull(line2);
+        assertEquals(line2.getType(), Line.Type.VERTICAL);
+        assertNull(line2.getSlope());
+
+        intersection = LineUtils.getPointOfIntersection(line,line2);
+        assertNotNull(intersection);
     }
 }
