@@ -1,14 +1,23 @@
 package com.jarvis.dragdropresearch.funwithshapes;
 
-import com.jarvis.dragdropresearch.interpolators.RectangleInterpolator;
+import com.jarvis.dragdropresearch.interpolators.StarInterpolator;
 
 public class StarShape extends FlashShape {
     private static final int MAX_COMPONENT_COUNT = 6;
 
-    private RectangleInterpolator mRectangleInterpolator;
+    private StarInterpolator mStarInterpolator;
 
     public StarShape() {
-        super(Type.RECTANGLE);
+        super(Type.STAR);
+    }
+
+    public StarInterpolator getStarInterpolator() {
+        return mStarInterpolator;
+    }
+
+    public void setStarInterpolator(
+            StarInterpolator starInterpolator) {
+        mStarInterpolator = starInterpolator;
     }
 
     @Override
