@@ -135,8 +135,9 @@ public abstract class FlashShape {
 
     public enum Type {
         ARC,
-        SPIRAL,
         RECTANGLE,
+        SPIRAL,
+        STAR,
         TRIANGLE
     }
 }
