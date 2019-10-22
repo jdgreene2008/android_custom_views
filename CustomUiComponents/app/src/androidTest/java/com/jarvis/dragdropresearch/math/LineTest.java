@@ -343,7 +343,7 @@ public class LineTest {
 
         unitVector = line.getUnitVector();
 
-        assertEquals(expectedValue.x,unitVector.x,0.01);
+        assertEquals(expectedValue.x, unitVector.x, 0.01);
         assertEquals(expectedValue.y, unitVector.y, 0.01);
 
         // Line y = 2x. Expected unit vector (1/sqrt(5),2/sqrt(5))
@@ -357,11 +357,52 @@ public class LineTest {
 
         expectedValue = new PointF();
         expectedValue.x = (float)Math.pow(Math.sqrt(5), -1);
-        expectedValue.y = (float)((float) 2 * (Math.pow(Math.sqrt(5), -1)));
+        expectedValue.y = (float)((float)2 * (Math.pow(Math.sqrt(5), -1)));
 
         unitVector = line.getUnitVector();
 
         assertEquals(expectedValue.x, unitVector.x, 0.01);
         assertEquals(expectedValue.y, unitVector.y, 0.01);
+    }
+
+    @Test
+    public void test_slopeOrthogonalLine() {
+        Line line;
+        Line.Builder builder;
+
+        // vertical line: (x = 5) Slope of orthogonal line should be 0.
+        builder = new Line.Builder(Line.Type.VERTICAL);
+        builder.setXIntercept(5f);
+        line = builder.build();
+
+        Float orthogonalLineSlope = line.getOrthogonalLineSlope();
+        assertNotNull(orthogonalLineSlope);
+        assertEquals(0, orthogonalLineSlope, 0);
+
+        // horizontal line: (y = 5). Slope of orthogonal line should be undefined.
+        builder = new Line.Builder(Line.Type.HORIZONTAL);
+        line = builder.build();
+        assertNull(line.getOrthogonalLineSlope());
+
+        // diagonal line: (y = 2x). Expected slope:  -1/2
+        builder = new Line.Builder(Line.Type.DIAGONAL);
+        builder.setSlope(2f);
+        line = builder.build();
+        assertNotNull(line.getOrthogonalLineSlope());
+        assertEquals(-0.5f, line.getOrthogonalLineSlope(), 0);
+
+        // diagonal line: (y = -2x). Expected slope:  1/2
+        builder = new Line.Builder(Line.Type.DIAGONAL);
+        builder.setSlope(-2f);
+        line = builder.build();
+        assertNotNull(line.getOrthogonalLineSlope());
+        assertEquals(0.5f, line.getOrthogonalLineSlope(), 0);
+
+        // diagonal line: (y = 4/3x). Expected slope:  -0.75
+        builder = new Line.Builder(Line.Type.DIAGONAL);
+        builder.setSlope(4f/3);
+        line = builder.build();
+        assertNotNull(line.getOrthogonalLineSlope());
+        assertEquals(-(3f/4), line.getOrthogonalLineSlope(), 0);
     }
 }

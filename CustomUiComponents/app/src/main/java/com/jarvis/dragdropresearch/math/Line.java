@@ -10,6 +10,7 @@ public class Line extends Equation {
             "Represents the slope-intercept form of an equation for a line.";
 
     private Float mSlope;
+    private Float mOrthogonalLineSlope;
     private Float mYIntercept;
     private Float mXIntercept;
 
@@ -102,6 +103,16 @@ public class Line extends Equation {
     }
 
     /**
+     * Get slope of orthogonal line.
+     *
+     * @return {@link Float} containing the slope of a line that runs perpendicular to this line.
+     */
+    @Nullable
+    public Float getOrthogonalLineSlope() {
+        return mOrthogonalLineSlope;
+    }
+
+    /**
      * @return {@link PointF} containing the x and y values for the unit vector for this line.
      */
     public PointF getUnitVector() {
@@ -122,6 +133,15 @@ public class Line extends Equation {
             float magnitude = (float)Math
                     .sqrt(Math.pow(differenceVector.x, 2) + Math.pow(differenceVector.y, 2));
             return new PointF(differenceVector.x / magnitude, differenceVector.y / magnitude);
+        }
+    }
+
+    private void calculateOrthogonalLineSlope() {
+        if (mType == Type.HORIZONTAL) return;
+        if (mType == Type.VERTICAL) {
+            mOrthogonalLineSlope = 0f;
+        } else {
+            mOrthogonalLineSlope = -1 * (float)Math.pow(mSlope, -1);
         }
     }
 
@@ -163,15 +183,19 @@ public class Line extends Equation {
         }
 
         public Line build() {
+            Line line;
             if (mType == Type.VERTICAL) {
-                return new Line(null, null, mXIntercept, Type.VERTICAL);
+                line = new Line(null, null, mXIntercept, Type.VERTICAL);
             } else if (mType == Type.HORIZONTAL ||
                     mSlope == 0) {
-                return new Line(0f, mYIntercept, null, Type.HORIZONTAL);
+                line = new Line(0f, mYIntercept, null, Type.HORIZONTAL);
             } else {
                 if (mYIntercept == null) mYIntercept = 0f;
-                return new Line(mSlope, mYIntercept, mXIntercept, Type.DIAGONAL);
+                line = new Line(mSlope, mYIntercept, mXIntercept, Type.DIAGONAL);
             }
+
+            line.calculateOrthogonalLineSlope();
+            return line;
         }
     }
 }
