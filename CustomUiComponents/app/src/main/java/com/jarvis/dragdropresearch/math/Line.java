@@ -112,6 +112,13 @@ public class Line extends Equation {
         return mOrthogonalLineSlope;
     }
 
+    @Nullable
+    public PointF getPointAtDistance(PointF src, float distance) {
+        if (src == null || !containsPoint(src)) return null;
+        PointF unitVector = getUnitVector();
+        return new PointF(src.x + distance * unitVector.x, src.y + distance * unitVector.y);
+    }
+
     /**
      * @return {@link PointF} containing the x and y values for the unit vector for this line.
      */

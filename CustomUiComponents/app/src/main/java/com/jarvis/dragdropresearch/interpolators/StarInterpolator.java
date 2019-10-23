@@ -121,6 +121,7 @@ public class StarInterpolator extends Interpolator {
 
     private void constructStarMetrics() {
         float ratioWidthToHeight = mWidth / mHeight;
+        mDrawingDescriptor = new DrawingDescriptor();
 
         PointF center = new PointF(mWidth / 2, mHeight / 2);
 
@@ -141,8 +142,6 @@ public class StarInterpolator extends Interpolator {
 
         createTriangleMetrics(mCenterPolygonPeakPoint, centerPolygonHeight,
                 mIntersectionRightSideBottomRightSide, mIntersectionLeftSideBottomLeftSide);
-
-        mDrawingDescriptor = new DrawingDescriptor();
     }
 
     private void createCenterPolygonLines(PointF center, float centerPolygonHeight,
@@ -231,18 +230,29 @@ public class StarInterpolator extends Interpolator {
         //1 . Top triangle
         float topTriangleBase = mRightSideLine.getXIntercept() - mLeftSideLine.getXIntercept();
         float topTriangleAltitude = mHeight - mTopLine.getYIntercept();
+
         mTopTriangleInterpolator =
                 new TriangleInterpolator(getMaxValue(), topTriangleAltitude, topTriangleBase);
+        mDrawingDescriptor.setTopTrianglePeak(new PointF(centerPolygonPeakPoint.x,
+                mTopLine.getYIntercept() + topTriangleAltitude));
 
         //2. Left and right triangles
         float leftTriangleBase = mTopLine.getYIntercept() - centerPolygonHeight;
         float rightTriangleBase = leftTriangleBase;
         float leftTriangleAltitude = mWidth - mBottomRightLine.getXIntercept();
         float rightTriangleAltitude = leftTriangleAltitude;
+
         mLeftTriangleInterpolator =
                 new TriangleInterpolator(getMaxValue(), leftTriangleAltitude, leftTriangleBase);
         mRightTriangleInterpolator =
                 new TriangleInterpolator(getMaxValue(), rightTriangleAltitude, rightTriangleBase);
+        mDrawingDescriptor
+                .setLeftTrianglePeak(
+                        new PointF(0, mTopLine.getYIntercept() - leftTriangleBase / 2));
+        mDrawingDescriptor
+                .setRightTrianglePeak(
+                        new PointF(mRightSideLine.getXIntercept() + rightTriangleAltitude,
+                                mTopLine.getYIntercept() - rightTriangleBase / 2));
 
         //3. Bottom triangles.
         float bottomRightTriangleBase = LineUtils.getDistanceBetweenPoints(centerPolygonPeakPoint,
@@ -255,6 +265,8 @@ public class StarInterpolator extends Interpolator {
         float bottomLeftTriangleAltitude = LineUtils
                 .getDistanceBetweenPoints(mBottomLeftLineMidpoint,
                         mBottomLeftLineBisectorXAxisIntercept);
+        mDrawingDescriptor.setBottomLeftTrianglePeak(mBottomLeftLineBisectorXAxisIntercept);
+        mDrawingDescriptor.setBottomRightTrianglePeak(mBottomRightLineBisectorXAxisIntercept);
 
         mBottomRightTriangleInterpolator =
                 new TriangleInterpolator(getMaxValue(), bottomRightTriangleAltitude,
@@ -268,8 +280,98 @@ public class StarInterpolator extends Interpolator {
      * @return {@link DrawingDescriptor} containing the coordinates for drawing the star triangles.
      */
     public DrawingDescriptor getDrawingDescriptor() {
-        // TODO: Perform calculations to update the drawing descriptor based on the interpolated values.
+        calculateTopTriangleDrawing();
+        calculateRightTriangleDrawing();
+        calculateLeftTriangleDrawing();
+        calculateBottomLeftTriangleDrawing();
+        calculateBottomRightTriangleDrawing();
         return mDrawingDescriptor;
+    }
+
+    private void calculateTopTriangleDrawing() {
+        float[] interpolatedValues = mTopTriangleInterpolator.getInterpolatedValues();
+        PointF peakVertex = mDrawingDescriptor.getTopTrianglePeak();
+
+        float halfBase = interpolatedValues[TriangleInterpolator.INTERPOLATION_VALUES_BASE] / 2;
+        float altitude = interpolatedValues[TriangleInterpolator.INTERPOLATION_VALUES_ALTITUDE];
+        mDrawingDescriptor.setTopTriangleLeftVertex(
+                new PointF(peakVertex.x - halfBase, peakVertex.y - altitude));
+        mDrawingDescriptor.setTopTriangleRightVertex(
+                new PointF(peakVertex.x + halfBase, peakVertex.y - altitude));
+    }
+
+    private void calculateLeftTriangleDrawing() {
+        float[] interpolatedValues = mLeftTriangleInterpolator.getInterpolatedValues();
+        PointF peakVertex = mDrawingDescriptor.getLeftTrianglePeak();
+
+        float halfBase = interpolatedValues[TriangleInterpolator.INTERPOLATION_VALUES_BASE] / 2;
+        float altitude = interpolatedValues[TriangleInterpolator.INTERPOLATION_VALUES_ALTITUDE];
+        mDrawingDescriptor.setLeftTriangleTopVertex(
+                new PointF(altitude, peakVertex.y + halfBase));
+        mDrawingDescriptor.setLeftTriangleBottomVertex(
+                new PointF(altitude, peakVertex.y - halfBase));
+    }
+
+    private void calculateRightTriangleDrawing() {
+        float[] interpolatedValues = mRightTriangleInterpolator.getInterpolatedValues();
+        PointF peakVertex = mDrawingDescriptor.getRightTrianglePeak();
+
+        float halfBase = interpolatedValues[TriangleInterpolator.INTERPOLATION_VALUES_BASE] / 2;
+        float altitude = interpolatedValues[TriangleInterpolator.INTERPOLATION_VALUES_ALTITUDE];
+        mDrawingDescriptor.setRightTriangleTopVertex(
+                new PointF(peakVertex.x - altitude, peakVertex.y + halfBase));
+        mDrawingDescriptor.setRightTriangleBottomVertex(
+                new PointF(peakVertex.x - altitude, peakVertex.y - halfBase));
+    }
+
+    private void calculateBottomLeftTriangleDrawing() {
+        float[] interpolatedValues = mBottomLeftTriangleInterpolator.getInterpolatedValues();
+        PointF peakVertex = mDrawingDescriptor.getBottomLeftTrianglePeak();
+
+        float halfBase = interpolatedValues[TriangleInterpolator.INTERPOLATION_VALUES_BASE] / 2;
+        float altitude = interpolatedValues[TriangleInterpolator.INTERPOLATION_VALUES_ALTITUDE];
+
+        // Calculate the point distance of altitude away from the peak.
+        Line bottomLeftLineXAxisBisector =
+                LineUtils.createLineFromSlopeAndPoint(mBottomLeftBisectorSlope, peakVertex);
+        PointF pointOnBisector =
+                bottomLeftLineXAxisBisector.getPointAtDistance(peakVertex, altitude);
+        if (pointOnBisector == null) {
+            Log.d(TAG, "calculateBottomLeftTriangleDrawing() : pointOnBisector is null");
+            return;
+        }
+
+        Line baseLine =
+                LineUtils.createLineFromSlopeAndPoint(mBottomLeftLine.getSlope(), pointOnBisector);
+        mDrawingDescriptor.setBottomLeftTriangleUpperLeftVertex(
+                baseLine.getPointAtDistance(pointOnBisector, -1f * (halfBase / 2)));
+        mDrawingDescriptor.setBottomLeftTriangleUpperRightVertex(
+                baseLine.getPointAtDistance(pointOnBisector, halfBase / 2));
+    }
+
+    private void calculateBottomRightTriangleDrawing() {
+        float[] interpolatedValues = mBottomRightTriangleInterpolator.getInterpolatedValues();
+        PointF peakVertex = mDrawingDescriptor.getBottomRightTrianglePeak();
+
+        float halfBase = interpolatedValues[TriangleInterpolator.INTERPOLATION_VALUES_BASE] / 2;
+        float altitude = interpolatedValues[TriangleInterpolator.INTERPOLATION_VALUES_ALTITUDE];
+
+        // Calculate the point distance of altitude away from the peak.
+        Line bottomRightLineXAxisBisector =
+                LineUtils.createLineFromSlopeAndPoint(mBottomRightBisectorSlope, peakVertex);
+        PointF pointOnBisector =
+                bottomRightLineXAxisBisector.getPointAtDistance(peakVertex, -1f * altitude);
+        if (pointOnBisector == null) {
+            Log.d(TAG, "calculateBottomRightTriangleDrawing() : pointOnBisector is null");
+            return;
+        }
+
+        Line baseLine =
+                LineUtils.createLineFromSlopeAndPoint(mBottomRightLine.getSlope(), pointOnBisector);
+        mDrawingDescriptor.setBottomRightTriangleUpperLeftVertex(
+                baseLine.getPointAtDistance(pointOnBisector, -1f * (halfBase / 2)));
+        mDrawingDescriptor.setBottomRightTriangleUpperRightVertex(
+                baseLine.getPointAtDistance(pointOnBisector, halfBase / 2));
     }
 
     /**

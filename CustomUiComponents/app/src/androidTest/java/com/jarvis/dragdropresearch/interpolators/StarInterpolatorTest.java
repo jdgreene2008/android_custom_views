@@ -11,12 +11,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 public class StarInterpolatorTest {
+    private static final int INTERPOLATION_MAX_VALUE = 800;
 
     private StarInterpolator mInterpolator;
 
     @Before
     public void setUp() {
-        StarInterpolator.Builder builder = new StarInterpolator.Builder(800);
+        StarInterpolator.Builder builder = new StarInterpolator.Builder(INTERPOLATION_MAX_VALUE);
         builder.setWidth(500)
                 .setHeight(500);
         mInterpolator = builder.build();
@@ -81,10 +82,40 @@ public class StarInterpolatorTest {
         assertNotNull(bottomLeftBisector);
         assertNotNull(bottomRightBisector);
 
-        PointF bottomLeftLineBisectorXAxisIntercept = mInterpolator.getBottomLeftLineBisectorXAxisIntercept();
-        PointF bottomRightLineBisectorXAxisIntercept = mInterpolator.getBottomRightLineBisectorXAxisIntercept();
+        PointF bottomLeftLineBisectorXAxisIntercept =
+                mInterpolator.getBottomLeftLineBisectorXAxisIntercept();
+        PointF bottomRightLineBisectorXAxisIntercept =
+                mInterpolator.getBottomRightLineBisectorXAxisIntercept();
 
         assertNotNull(bottomLeftLineBisectorXAxisIntercept);
         assertNotNull(bottomRightLineBisectorXAxisIntercept);
+    }
+
+    @Test
+    public void test_interpolationUpdatesDrawingDescriptor() {
+        assertNotNull(mInterpolator);
+        mInterpolator.updateValue(INTERPOLATION_MAX_VALUE / 2);
+
+        TriangleInterpolator topTriangleInterpolator = mInterpolator.getTopTriangleInterpolator();
+        TriangleInterpolator rightTriangleInterpolator =
+                mInterpolator.getRightTriangleInterpolator();
+        TriangleInterpolator leftTriangleInterpolator = mInterpolator.getLeftTriangleInterpolator();
+        TriangleInterpolator bottomRightTriangleInterpolator =
+                mInterpolator.getBottomRightTriangleInterpolator();
+        TriangleInterpolator bottomLeftTriangleInterpolator = mInterpolator.getBottomLeftTriangleInterpolator();
+
+        assertNotNull(topTriangleInterpolator);
+        assertNotNull(rightTriangleInterpolator);
+        assertNotNull(leftTriangleInterpolator);
+        assertNotNull(bottomLeftTriangleInterpolator);
+        assertNotNull(bottomRightTriangleInterpolator);
+
+        assertEquals(topTriangleInterpolator.getValue(),INTERPOLATION_MAX_VALUE/2);
+        assertEquals(rightTriangleInterpolator.getValue(), INTERPOLATION_MAX_VALUE / 2);
+        assertEquals(leftTriangleInterpolator.getValue(), INTERPOLATION_MAX_VALUE / 2);
+        assertEquals(bottomRightTriangleInterpolator.getValue(), INTERPOLATION_MAX_VALUE / 2);
+        assertEquals(bottomLeftTriangleInterpolator.getValue(), INTERPOLATION_MAX_VALUE / 2);
+
+        assertNotNull(mInterpolator.getDrawingDescriptor());
     }
 }
