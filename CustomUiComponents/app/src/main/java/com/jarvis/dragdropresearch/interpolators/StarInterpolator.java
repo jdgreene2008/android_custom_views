@@ -30,7 +30,8 @@ public class StarInterpolator extends Interpolator {
     private TriangleInterpolator mTopTriangleInterpolator;
     private TriangleInterpolator mRightTriangleInterpolator;
     private TriangleInterpolator mLeftTriangleInterpolator;
-    private TriangleInterpolator mBottomTrianglesInterpolator;
+    private TriangleInterpolator mBottomRightTriangleInterpolator;
+    private TriangleInterpolator mBottomLeftTriangleInterpolator;
 
     // Key Points
     private PointF mBottomRightLineMidpoint;
@@ -39,6 +40,8 @@ public class StarInterpolator extends Interpolator {
     // Points where the bottom left and right triangles intersect the X axis.
     private PointF mBottomRightLineBisectorXAxisIntercept;
     private PointF mBottomLeftLineBisectorXAxisIntercept;
+
+    private DrawingDescriptor mDrawingDescriptor;
 
     private StarInterpolator(int maxValue, float width, float height) {
         super(maxValue);
@@ -154,9 +157,188 @@ public class StarInterpolator extends Interpolator {
         mLeftTriangleInterpolator =
                 new TriangleInterpolator(getMaxValue(), rightTriangleAltitude, rightTriangleBase);
 
-        //3. Bottom sides.
-        // TODO: Get dimensions for bottom left and right triangles.
+        //3. Bottom triangles.
+        float bottomRightTriangleBase = LineUtils.getDistanceBetweenPoints(centerPolygonPeakPoint,
+                intersectionRightSideBottomRightSide);
+        float bottomLeftTriangleBase = LineUtils.getDistanceBetweenPoints(centerPolygonPeakPoint,
+                intersectionLeftSideBottomLeftSide);
+        float bottomRightTriangleAltitude = LineUtils
+                .getDistanceBetweenPoints(mBottomRightLineMidpoint,
+                        mBottomRightLineBisectorXAxisIntercept);
+        float bottomLeftTriangleAltitude = LineUtils
+                .getDistanceBetweenPoints(mBottomLeftLineMidpoint,
+                        mBottomLeftLineBisectorXAxisIntercept);
 
+        mBottomRightTriangleInterpolator =
+                new TriangleInterpolator(getMaxValue(), bottomRightTriangleAltitude,
+                        bottomRightTriangleBase);
+        mBottomLeftTriangleInterpolator =
+                new TriangleInterpolator(getMaxValue(), bottomLeftTriangleAltitude,
+                        bottomLeftTriangleBase);
+
+        mDrawingDescriptor = new DrawingDescriptor();
+    }
+
+    /**
+     * @return {@link DrawingDescriptor} containing the coordinates for drawing the star triangles.
+     */
+    public DrawingDescriptor getDrawingDescriptor() {
+        return mDrawingDescriptor;
+    }
+
+    /**
+     * Contains the metrics needed to draw this star in the coordinate plane.
+     */
+    private static class DrawingDescriptor {
+        // Bottom Right Triangle
+        private PointF mBottomRightTriangleUpperRightVertex;
+        private PointF mBottomRightTriangleUpperLeftVertex;
+        private PointF mBottomRightTrianglePeak;
+
+        // Bottom Left Triangle
+        private PointF mBottomLeftTriangleUpperLeftVertex;
+        private PointF mBottomLeftTriangleUpperRightVertex;
+        private PointF mBottomLeftTrianglePeak;
+
+        // Top Triangle
+        private PointF mTopTriangleLeftVertex;
+        private PointF mTopTriangleRightVertex;
+        private PointF mTopTrianglePeak;
+
+        // Left Triangle
+        private PointF mLeftTriangleTopVertex;
+        private PointF mLeftTriangleBottomVertex;
+        private PointF mLeftTrianglePeak;
+
+        // Right Triangle
+        private PointF mRightTriangleTopVertex;
+        private PointF mRightTriangleBottomVertex;
+        private PointF mRightTrianglePeak;
+
+        public PointF getBottomRightTriangleUpperRightVertex() {
+            return mBottomRightTriangleUpperRightVertex;
+        }
+
+        public PointF getBottomRightTriangleUpperLeftVertex() {
+            return mBottomRightTriangleUpperLeftVertex;
+        }
+
+        public PointF getBottomLeftTriangleUpperLeftVertex() {
+            return mBottomLeftTriangleUpperLeftVertex;
+        }
+
+        public PointF getBottomLeftTriangleUpperRightVertex() {
+            return mBottomLeftTriangleUpperRightVertex;
+        }
+
+        public PointF getBottomRightTrianglePeak() {
+            return mBottomRightTrianglePeak;
+        }
+
+        public PointF getBottomLeftTrianglePeak() {
+            return mBottomLeftTrianglePeak;
+        }
+
+        private void setBottomRightTriangleUpperRightVertex(
+                PointF bottomRightTriangleUpperRightVertex) {
+            mBottomRightTriangleUpperRightVertex = bottomRightTriangleUpperRightVertex;
+        }
+
+        private void setBottomRightTriangleUpperLeftVertex(
+                PointF bottomRightTriangleUpperLeftVertex) {
+            mBottomRightTriangleUpperLeftVertex = bottomRightTriangleUpperLeftVertex;
+        }
+
+        private void setBottomLeftTriangleUpperLeftVertex(
+                PointF bottomLeftTriangleUpperLeftVertex) {
+            mBottomLeftTriangleUpperLeftVertex = bottomLeftTriangleUpperLeftVertex;
+        }
+
+        private void setBottomLeftTriangleUpperRightVertex(
+                PointF bottomLeftTriangleUpperRightVertex) {
+            mBottomLeftTriangleUpperRightVertex = bottomLeftTriangleUpperRightVertex;
+        }
+
+        private void setBottomRightTrianglePeak(
+                PointF bottomRightTrianglePeak) {
+            mBottomRightTrianglePeak = bottomRightTrianglePeak;
+        }
+
+        private void setBottomLeftTrianglePeak(PointF bottomLeftTrianglePeak) {
+            mBottomLeftTrianglePeak = bottomLeftTrianglePeak;
+        }
+
+        public PointF getTopTriangleLeftVertex() {
+            return mTopTriangleLeftVertex;
+        }
+
+        private void setTopTriangleLeftVertex(PointF topTriangleLeftVertex) {
+            mTopTriangleLeftVertex = topTriangleLeftVertex;
+        }
+
+        public PointF getTopTriangleRightVertex() {
+            return mTopTriangleRightVertex;
+        }
+
+        private void setTopTriangleRightVertex(PointF topTriangleRightVertex) {
+            mTopTriangleRightVertex = topTriangleRightVertex;
+        }
+
+        public PointF getTopTrianglePeak() {
+            return mTopTrianglePeak;
+        }
+
+        private void setTopTrianglePeak(PointF topTrianglePeak) {
+            mTopTrianglePeak = topTrianglePeak;
+        }
+
+        public PointF getLeftTriangleTopVertex() {
+            return mLeftTriangleTopVertex;
+        }
+
+        private void setLeftTriangleTopVertex(PointF leftTriangleTopVertex) {
+            mLeftTriangleTopVertex = leftTriangleTopVertex;
+        }
+
+        public PointF getLeftTriangleBottomVertex() {
+            return mLeftTriangleBottomVertex;
+        }
+
+        private void setLeftTriangleBottomVertex(PointF leftTriangleBottomVertex) {
+            mLeftTriangleBottomVertex = leftTriangleBottomVertex;
+        }
+
+        public PointF getLeftTrianglePeak() {
+            return mLeftTrianglePeak;
+        }
+
+        private void setLeftTrianglePeak(PointF leftTrianglePeak) {
+            mLeftTrianglePeak = leftTrianglePeak;
+        }
+
+        public PointF getRightTriangleTopVertex() {
+            return mRightTriangleTopVertex;
+        }
+
+        private void setRightTriangleTopVertex(PointF rightTriangleTopVertex) {
+            mRightTriangleTopVertex = rightTriangleTopVertex;
+        }
+
+        public PointF getRightTriangleBottomVertex() {
+            return mRightTriangleBottomVertex;
+        }
+
+        private void setRightTriangleBottomVertex(PointF rightTriangleBottomVertex) {
+            mRightTriangleBottomVertex = rightTriangleBottomVertex;
+        }
+
+        public PointF getRightTrianglePeak() {
+            return mRightTrianglePeak;
+        }
+
+        private void setRightTrianglePeak(PointF rightTrianglePeak) {
+            mRightTrianglePeak = rightTrianglePeak;
+        }
     }
 
     public static class Builder {
