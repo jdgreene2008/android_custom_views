@@ -36,6 +36,9 @@ public class StarInterpolator extends Interpolator {
     // Key Points
     private PointF mBottomRightLineMidpoint;
     private PointF mBottomLeftLineMidpoint;
+    private PointF mCenterPolygonPeakPoint;
+    private PointF mIntersectionLeftSideBottomLeftSide;
+    private PointF mIntersectionRightSideBottomRightSide;
 
     // Points where the bottom left and right triangles intersect the X axis.
     private PointF mBottomRightLineBisectorXAxisIntercept;
@@ -62,6 +65,22 @@ public class StarInterpolator extends Interpolator {
         float leftLineXIntercept = center.x - centerPolygonWidth / 2;
         float rightLineXIntercept = center.x + centerPolygonWidth / 2;
 
+        float centerPolygonPeakHeight = centerPolygonHeight + centerPolygonHeight / 4;
+
+        createCenterPolygonLines(center, centerPolygonHeight, centerPolygonPeakHeight,
+                topLineYIntercept, leftLineXIntercept, rightLineXIntercept);
+
+        createBottomLineBisectors();
+
+        createTriangleMetrics(mCenterPolygonPeakPoint, centerPolygonHeight,
+                mIntersectionRightSideBottomRightSide, mIntersectionLeftSideBottomLeftSide);
+
+        mDrawingDescriptor = new DrawingDescriptor();
+    }
+
+    private void createCenterPolygonLines(PointF center, float centerPolygonHeight,
+            float centerPolygonPeakHeight, float topLineYIntercept, float leftLineXIntercept,
+            float rightLineXIntercept) {
         // Build top line
         Line.Builder builder = new Line.Builder(Line.Type.HORIZONTAL);
         builder.setYIntercept(topLineYIntercept);
@@ -79,40 +98,40 @@ public class StarInterpolator extends Interpolator {
 
         // Build Bottom Lines
         // Total height of the inner pentagon
-        float centerPolygonPeakHeight = centerPolygonHeight + centerPolygonHeight / 4;
-        PointF centerPolygonPeakPoint =
+        mCenterPolygonPeakPoint =
                 new PointF(center.x, mTopLine.getYIntercept() - centerPolygonPeakHeight);
 
         // Build bottom right line;
-        PointF intersectionRightSideBottomRightSide = new PointF(mRightSideLine.getXIntercept(),
+        mIntersectionRightSideBottomRightSide = new PointF(mRightSideLine.getXIntercept(),
                 mTopLine.getYIntercept() - centerPolygonHeight);
-        mBottomRightLine = LineUtils.createLineFromTwoPoints(centerPolygonPeakPoint,
-                intersectionRightSideBottomRightSide);
+        mBottomRightLine = LineUtils.createLineFromTwoPoints(mCenterPolygonPeakPoint,
+                mIntersectionRightSideBottomRightSide);
         if (mBottomRightLine != null) {
             mBottomRightLineMidpoint = mBottomRightLine
-                    .getMidpoint(centerPolygonPeakPoint, intersectionRightSideBottomRightSide);
+                    .getMidpoint(mCenterPolygonPeakPoint, mIntersectionRightSideBottomRightSide);
         } else {
             Log.d(TAG, "Error constructing star. Bottom right line is null");
             return;
         }
 
         // Build bottom left line;
-        PointF intersectionLeftSideBottomLeftSide = new PointF(mLeftSideLine.getXIntercept(),
+        mIntersectionLeftSideBottomLeftSide = new PointF(mLeftSideLine.getXIntercept(),
                 mTopLine.getYIntercept() - centerPolygonHeight);
-        mBottomLeftLine = LineUtils.createLineFromTwoPoints(centerPolygonPeakPoint,
-                intersectionLeftSideBottomLeftSide);
+        mBottomLeftLine = LineUtils.createLineFromTwoPoints(mCenterPolygonPeakPoint,
+                mIntersectionLeftSideBottomLeftSide);
         if (mBottomLeftLine != null) {
             mBottomLeftLineMidpoint = mBottomLeftLine
-                    .getMidpoint(centerPolygonPeakPoint, intersectionLeftSideBottomLeftSide);
+                    .getMidpoint(mCenterPolygonPeakPoint, mIntersectionLeftSideBottomLeftSide);
         } else {
             Log.d(TAG, "Error constructing star. Bottom left line is null");
             return;
         }
+    }
 
+    private void createBottomLineBisectors() {
         // Create bottom and left side line bisectors.
         if (mBottomLeftLine.getSlope() == null || mBottomRightLine.getSlope() == null) {
             Log.d(TAG, "Error constructing star. Bottom lines slope is null.");
-            return;
         } else {
             mBottomRightBisectorSlope = mBottomRightLine.getOrthogonalLineSlope();
             mBottomLeftBisectorSlope = mBottomLeftLine.getOrthogonalLineSlope();
@@ -138,9 +157,11 @@ public class StarInterpolator extends Interpolator {
             mBottomLeftLineBisectorXAxisIntercept =
                     LineUtils.getPointOfIntersection(xAxis, mBottomLeftBisector);
         }
+    }
 
-        // Determine triangle metrics.
-
+    private void createTriangleMetrics(PointF centerPolygonPeakPoint, float centerPolygonHeight,
+            PointF intersectionRightSideBottomRightSide,
+            PointF intersectionLeftSideBottomLeftSide) {
         //1 . Top triangle
         float topTriangleBase = mRightSideLine.getXIntercept() - mLeftSideLine.getXIntercept();
         float topTriangleAltitude = mHeight - mTopLine.getYIntercept();
@@ -175,14 +196,13 @@ public class StarInterpolator extends Interpolator {
         mBottomLeftTriangleInterpolator =
                 new TriangleInterpolator(getMaxValue(), bottomLeftTriangleAltitude,
                         bottomLeftTriangleBase);
-
-        mDrawingDescriptor = new DrawingDescriptor();
     }
 
     /**
      * @return {@link DrawingDescriptor} containing the coordinates for drawing the star triangles.
      */
     public DrawingDescriptor getDrawingDescriptor() {
+        // TODO: Perform calculations to update the drawing descriptor based on the interpolated values.
         return mDrawingDescriptor;
     }
 
