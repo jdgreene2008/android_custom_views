@@ -11,6 +11,13 @@ public final class LineUtils {
     }
 
     /**
+     * Return the shortest distance between two points on a line.
+     */
+    public static float getDistanceBetweenPoints(PointF a, PointF b) {
+        return (float)Math.sqrt(Math.pow(b.x - a.x, 2) + Math.pow(b.y - a.y, 2));
+    }
+
+    /**
      * Return an equation for a {@link Line} when the slope is provided and one point is known.
      *
      * @param slope Slope. If null, the line will be considered a vertical line with x-intercept
@@ -29,7 +36,8 @@ public final class LineUtils {
             Line.Builder builder = new Line.Builder(Line.Type.VERTICAL);
             builder.setXIntercept(point.x);
             return builder.build();
-        } if (slope == 0) {
+        }
+        if (slope == 0) {
             Line.Builder builder = new Line.Builder(Line.Type.HORIZONTAL);
             builder.setYIntercept(point.y)
                     .setSlope(slope);

@@ -18,13 +18,13 @@ public class StarInterpolator extends Interpolator {
     private Line mRightSideLine;
     private Line mBottomLeftLine;
     private Line mBottomRightLine;
-    private float mMagnitudeBottomSidesSlope;
 
     // Lines that bisect the bottom left and right sides. These lines determine where
     // the bottom left and right triangles intersect the x-axis.
     private Line mBottomRightBisector;
     private Line mBottomLeftBisector;
-    private float mMagnitudeBisectorsSlope;
+    private Float mBottomRightBisectorSlope;
+    private Float mBottomLeftBisectorSlope;
 
     // Interpolators
     private TriangleInterpolator mTopTriangleInterpolator;
@@ -35,6 +35,10 @@ public class StarInterpolator extends Interpolator {
     // Key Points
     private PointF mBottomRightLineMidpoint;
     private PointF mBottomLeftLineMidpoint;
+
+    // Points where the bottom left and right triangles intersect the X axis.
+    private PointF mBottomRightLineBisectorXAxisIntercept;
+    private PointF mBottomLeftLineBisectorXAxisIntercept;
 
     private StarInterpolator(int maxValue, float width, float height) {
         super(maxValue);
@@ -50,8 +54,6 @@ public class StarInterpolator extends Interpolator {
         // Dimensions of the top,left and right sides of the square of the inner pentagon.
         float centerPolygonHeight = mHeight / 4;
         float centerPolygonWidth = centerPolygonHeight * ratioWidthToHeight;
-        // Total height of the inner pentagon
-        float centerPolygonPeakHeight = centerPolygonHeight + centerPolygonHeight / 4;
 
         float topLineYIntercept = center.y + centerPolygonHeight / 2;
         float leftLineXIntercept = center.x - centerPolygonWidth / 2;
@@ -73,8 +75,10 @@ public class StarInterpolator extends Interpolator {
         mRightSideLine = builder.build();
 
         // Build Bottom Lines
+        // Total height of the inner pentagon
+        float centerPolygonPeakHeight = centerPolygonHeight + centerPolygonHeight / 4;
         PointF centerPolygonPeakPoint =
-                new PointF(center.x, mTopLine.getYIntercept() - centerPolygonHeight);
+                new PointF(center.x, mTopLine.getYIntercept() - centerPolygonPeakHeight);
 
         // Build bottom right line;
         PointF intersectionRightSideBottomRightSide = new PointF(mRightSideLine.getXIntercept(),
@@ -103,14 +107,56 @@ public class StarInterpolator extends Interpolator {
         }
 
         // Create bottom and left side line bisectors.
-        if (mBottomLeftLine.getSlope() != null) {
-            mMagnitudeBottomSidesSlope = Math.abs(mBottomLeftLine.getSlope());
-        } else {
+        if (mBottomLeftLine.getSlope() == null || mBottomRightLine.getSlope() == null) {
             Log.d(TAG, "Error constructing star. Bottom lines slope is null.");
             return;
+        } else {
+            mBottomRightBisectorSlope = mBottomRightLine.getOrthogonalLineSlope();
+            mBottomLeftBisectorSlope = mBottomLeftLine.getOrthogonalLineSlope();
+
+            if (mBottomRightBisectorSlope == null) {
+                Log.d(TAG, "Error constructing star. Bottom right line bisector slope is null.");
+                return;
+            } else if (mBottomLeftBisectorSlope == null) {
+                Log.d(TAG, "Error constructing star. Bottom left line bisector is null.");
+                return;
+            }
+
+            // Define line for bottom right bisector and left bisector
+            mBottomRightBisector = LineUtils.createLineFromSlopeAndPoint(mBottomRightBisectorSlope,
+                    mBottomRightLineMidpoint);
+            mBottomLeftBisector = LineUtils
+                    .createLineFromSlopeAndPoint(mBottomLeftBisectorSlope, mBottomLeftLineMidpoint);
+
+            // Determine where bisectors intersect the x-axis
+            Line xAxis = LineUtils.createLineFromSlopeAndPoint(0f, new PointF(0, 0));
+            mBottomRightLineBisectorXAxisIntercept =
+                    LineUtils.getPointOfIntersection(xAxis, mBottomRightBisector);
+            mBottomLeftLineBisectorXAxisIntercept =
+                    LineUtils.getPointOfIntersection(xAxis, mBottomLeftBisector);
         }
 
-        // TODO: Create perpendicular bisecting lines for the bottom left and right sides.
+        // Determine triangle metrics.
+
+        //1 . Top triangle
+        float topTriangleBase = mRightSideLine.getXIntercept() - mLeftSideLine.getXIntercept();
+        float topTriangleAltitude = mHeight - mTopLine.getYIntercept();
+        mTopTriangleInterpolator =
+                new TriangleInterpolator(getMaxValue(), topTriangleAltitude, topTriangleBase);
+
+        //2. Left and right triangles
+        float leftTriangleBase = mTopLine.getYIntercept() - centerPolygonHeight;
+        float rightTriangleBase = leftTriangleBase;
+        float leftTriangleAltitude = mWidth - mBottomRightLine.getXIntercept();
+        float rightTriangleAltitude = leftTriangleAltitude;
+        mLeftTriangleInterpolator =
+                new TriangleInterpolator(getMaxValue(), leftTriangleAltitude, leftTriangleBase);
+        mLeftTriangleInterpolator =
+                new TriangleInterpolator(getMaxValue(), rightTriangleAltitude, rightTriangleBase);
+
+        //3. Bottom sides.
+        // TODO: Get dimensions for bottom left and right triangles.
+
     }
 
     public static class Builder {
