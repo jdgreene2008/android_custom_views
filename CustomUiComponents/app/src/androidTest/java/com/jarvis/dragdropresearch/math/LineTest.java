@@ -400,9 +400,26 @@ public class LineTest {
 
         // diagonal line: (y = 4/3x). Expected slope:  -0.75
         builder = new Line.Builder(Line.Type.DIAGONAL);
-        builder.setSlope(4f/3);
+        builder.setSlope(4f / 3);
         line = builder.build();
         assertNotNull(line.getOrthogonalLineSlope());
-        assertEquals(-(3f/4), line.getOrthogonalLineSlope(), 0);
+        assertEquals(-(3f / 4), line.getOrthogonalLineSlope(), 0);
+    }
+
+    @Test
+    public void test_distanceBetweenPoints() {
+        PointF a = new PointF(0, 0);
+        PointF b = new PointF(0, 10);
+
+        float distance = LineUtils.getDistanceBetweenPoints(a, b);
+        assertEquals(10, distance, 0);
+
+        b = new PointF(10, 0);
+        distance = LineUtils.getDistanceBetweenPoints(a, b);
+        assertEquals(10, distance, 0);
+
+        b = new PointF(3, 4);
+        distance = LineUtils.getDistanceBetweenPoints(a, b);
+        assertEquals(5, distance, 0);
     }
 }

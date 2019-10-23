@@ -14,6 +14,7 @@ public final class LineUtils {
      * Return the shortest distance between two points on a line.
      */
     public static float getDistanceBetweenPoints(PointF a, PointF b) {
+        if(a.equals(b)) return 0;
         return (float)Math.sqrt(Math.pow(b.x - a.x, 2) + Math.pow(b.y - a.y, 2));
     }
 
