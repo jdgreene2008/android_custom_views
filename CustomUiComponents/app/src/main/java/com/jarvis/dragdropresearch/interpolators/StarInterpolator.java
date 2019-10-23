@@ -6,6 +6,8 @@ import android.util.Log;
 import com.jarvis.dragdropresearch.math.Line;
 import com.jarvis.dragdropresearch.math.LineUtils;
 
+import androidx.annotation.VisibleForTesting;
+
 public class StarInterpolator extends Interpolator {
     private static final String TAG = StarInterpolator.class.getName();
 
@@ -50,6 +52,71 @@ public class StarInterpolator extends Interpolator {
         super(maxValue);
         mWidth = width;
         mHeight = height;
+    }
+
+    @Override
+    public void updateValue(int value) {
+        super.updateValue(value);
+        mTopTriangleInterpolator.updateValue(value);
+        mLeftTriangleInterpolator.updateValue(value);
+        mBottomLeftTriangleInterpolator.updateValue(value);
+        mRightTriangleInterpolator.updateValue(value);
+        mBottomRightTriangleInterpolator.updateValue(value);
+    }
+
+    @VisibleForTesting
+    public Line getBottomRightBisector() {
+        return mBottomRightBisector;
+    }
+
+    @VisibleForTesting
+    public Line getBottomLeftBisector() {
+        return mBottomLeftBisector;
+    }
+
+    @VisibleForTesting
+    public PointF getBottomRightLineMidpoint() {
+        return mBottomRightLineMidpoint;
+    }
+
+    @VisibleForTesting
+    public PointF getBottomLeftLineMidpoint() {
+        return mBottomLeftLineMidpoint;
+    }
+
+    @VisibleForTesting
+    public TriangleInterpolator getTopTriangleInterpolator() {
+        return mTopTriangleInterpolator;
+    }
+
+    @VisibleForTesting
+    public TriangleInterpolator getRightTriangleInterpolator() {
+        return mRightTriangleInterpolator;
+    }
+
+    @VisibleForTesting
+    public TriangleInterpolator getLeftTriangleInterpolator() {
+        return mLeftTriangleInterpolator;
+    }
+
+    @VisibleForTesting
+    public TriangleInterpolator getBottomRightTriangleInterpolator() {
+        return mBottomRightTriangleInterpolator;
+    }
+
+    @VisibleForTesting
+    public TriangleInterpolator getBottomLeftTriangleInterpolator() {
+        return mBottomLeftTriangleInterpolator;
+    }
+
+    @VisibleForTesting
+    public PointF getBottomRightLineBisectorXAxisIntercept() {
+        return mBottomRightLineBisectorXAxisIntercept;
+    }
+
+    @VisibleForTesting
+    public PointF getBottomLeftLineBisectorXAxisIntercept() {
+        return mBottomLeftLineBisectorXAxisIntercept;
     }
 
     private void constructStarMetrics() {
@@ -129,7 +196,6 @@ public class StarInterpolator extends Interpolator {
     }
 
     private void createBottomLineBisectors() {
-        // Create bottom and left side line bisectors.
         if (mBottomLeftLine.getSlope() == null || mBottomRightLine.getSlope() == null) {
             Log.d(TAG, "Error constructing star. Bottom lines slope is null.");
         } else {
@@ -175,7 +241,7 @@ public class StarInterpolator extends Interpolator {
         float rightTriangleAltitude = leftTriangleAltitude;
         mLeftTriangleInterpolator =
                 new TriangleInterpolator(getMaxValue(), leftTriangleAltitude, leftTriangleBase);
-        mLeftTriangleInterpolator =
+        mRightTriangleInterpolator =
                 new TriangleInterpolator(getMaxValue(), rightTriangleAltitude, rightTriangleBase);
 
         //3. Bottom triangles.

@@ -52,16 +52,8 @@ public class TriangleInterpolator extends Interpolator {
         return mBase;
     }
 
-    public void setBase(int base) {
-        mBase = base;
-    }
-
     public float getAltitude() {
         return mAltitude;
-    }
-
-    public void setAltitude(int altitude) {
-        mAltitude = altitude;
     }
 
     /**
