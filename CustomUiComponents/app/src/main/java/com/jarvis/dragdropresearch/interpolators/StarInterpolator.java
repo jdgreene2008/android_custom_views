@@ -123,17 +123,17 @@ public class StarInterpolator extends Interpolator {
         float ratioWidthToHeight = mWidth / mHeight;
         mDrawingDescriptor = new DrawingDescriptor();
 
-        PointF center = new PointF(mWidth / 2, mHeight / 2);
+        PointF center = new PointF(mWidth / 2f, mHeight / 2f);
 
         // Dimensions of the top,left and right sides of the square of the inner pentagon.
-        float centerPolygonHeight = mHeight / 4;
+        float centerPolygonHeight = mHeight / 4f;
         float centerPolygonWidth = centerPolygonHeight * ratioWidthToHeight;
 
-        float topLineYIntercept = center.y + centerPolygonHeight / 2;
-        float leftLineXIntercept = center.x - centerPolygonWidth / 2;
-        float rightLineXIntercept = center.x + centerPolygonWidth / 2;
+        float topLineYIntercept = center.y + centerPolygonHeight / 2f;
+        float leftLineXIntercept = center.x - centerPolygonWidth / 2f;
+        float rightLineXIntercept = center.x + centerPolygonWidth / 2f;
 
-        float centerPolygonPeakHeight = centerPolygonHeight + centerPolygonHeight / 4;
+        float centerPolygonPeakHeight = centerPolygonHeight + centerPolygonHeight / 4f;
 
         createCenterPolygonLines(center, centerPolygonHeight, centerPolygonPeakHeight,
                 topLineYIntercept, leftLineXIntercept, rightLineXIntercept);
@@ -190,7 +190,6 @@ public class StarInterpolator extends Interpolator {
                     .getMidpoint(mCenterPolygonPeakPoint, mIntersectionLeftSideBottomLeftSide);
         } else {
             Log.d(TAG, "Error constructing star. Bottom left line is null");
-            return;
         }
     }
 
@@ -227,6 +226,7 @@ public class StarInterpolator extends Interpolator {
     private void createTriangleMetrics(PointF centerPolygonPeakPoint, float centerPolygonHeight,
             PointF intersectionRightSideBottomRightSide,
             PointF intersectionLeftSideBottomLeftSide) {
+
         //1 . Top triangle
         float topTriangleBase = mRightSideLine.getXIntercept() - mLeftSideLine.getXIntercept();
         float topTriangleAltitude = mHeight - mTopLine.getYIntercept();
@@ -237,9 +237,9 @@ public class StarInterpolator extends Interpolator {
                 mTopLine.getYIntercept() + topTriangleAltitude));
 
         //2. Left and right triangles
-        float leftTriangleBase = mTopLine.getYIntercept() - centerPolygonHeight;
+        float leftTriangleBase = centerPolygonHeight;
         float rightTriangleBase = leftTriangleBase;
-        float leftTriangleAltitude = mWidth - mBottomRightLine.getXIntercept();
+        float leftTriangleAltitude = mLeftSideLine.getXIntercept();
         float rightTriangleAltitude = leftTriangleAltitude;
 
         mLeftTriangleInterpolator =
@@ -274,6 +274,13 @@ public class StarInterpolator extends Interpolator {
         mBottomLeftTriangleInterpolator =
                 new TriangleInterpolator(getMaxValue(), bottomLeftTriangleAltitude,
                         bottomLeftTriangleBase);
+
+        mDrawingDescriptor
+                .setBottomLeftLineBisectorXAxisIntercept(mBottomLeftLineBisectorXAxisIntercept);
+        mDrawingDescriptor.setBottomLeftLineMidpoint(mBottomLeftLineMidpoint);
+        mDrawingDescriptor
+                .setBottomRightLineBisectorXAxisIntercept(mBottomRightLineBisectorXAxisIntercept);
+        mDrawingDescriptor.setBottomRightLineMidpoint(mBottomRightLineMidpoint);
     }
 
     /**
@@ -344,9 +351,9 @@ public class StarInterpolator extends Interpolator {
         Line baseLine =
                 LineUtils.createLineFromSlopeAndPoint(mBottomLeftLine.getSlope(), pointOnBisector);
         mDrawingDescriptor.setBottomLeftTriangleUpperLeftVertex(
-                baseLine.getPointAtDistance(pointOnBisector, -1f * (halfBase / 2)));
+                baseLine.getPointAtDistance(pointOnBisector, -1f * halfBase));
         mDrawingDescriptor.setBottomLeftTriangleUpperRightVertex(
-                baseLine.getPointAtDistance(pointOnBisector, halfBase / 2));
+                baseLine.getPointAtDistance(pointOnBisector, halfBase));
     }
 
     private void calculateBottomRightTriangleDrawing() {
@@ -369,15 +376,15 @@ public class StarInterpolator extends Interpolator {
         Line baseLine =
                 LineUtils.createLineFromSlopeAndPoint(mBottomRightLine.getSlope(), pointOnBisector);
         mDrawingDescriptor.setBottomRightTriangleUpperLeftVertex(
-                baseLine.getPointAtDistance(pointOnBisector, -1f * (halfBase / 2)));
+                baseLine.getPointAtDistance(pointOnBisector, -1f * halfBase));
         mDrawingDescriptor.setBottomRightTriangleUpperRightVertex(
-                baseLine.getPointAtDistance(pointOnBisector, halfBase / 2));
+                baseLine.getPointAtDistance(pointOnBisector, halfBase));
     }
 
     /**
      * Contains the metrics needed to draw this star in the coordinate plane.
      */
-    private static class DrawingDescriptor {
+    public static class DrawingDescriptor {
         // Bottom Right Triangle
         private PointF mBottomRightTriangleUpperRightVertex;
         private PointF mBottomRightTriangleUpperLeftVertex;
@@ -403,6 +410,14 @@ public class StarInterpolator extends Interpolator {
         private PointF mRightTriangleBottomVertex;
         private PointF mRightTrianglePeak;
 
+        private PointF mBottomLeftLineMidpoint;
+        private PointF mBottomRightLineMidpoint;
+        private PointF mBottomRightLineBisectorXAxisIntercept;
+        private PointF mBottomLeftLineBisectorXAxisIntercept;
+        private PointF mCenterPolygonPeakPoint;
+        private PointF mIntersectionLeftSideBottomLeftSide;
+        private PointF mIntersectionRightSideBottomRightSide;
+
         public PointF getBottomRightTriangleUpperRightVertex() {
             return mBottomRightTriangleUpperRightVertex;
         }
@@ -425,6 +440,25 @@ public class StarInterpolator extends Interpolator {
 
         public PointF getBottomLeftTrianglePeak() {
             return mBottomLeftTrianglePeak;
+        }
+
+
+        private void setBottomLeftLineMidpoint(PointF bottomLeftLineMidpoint) {
+            mBottomLeftLineMidpoint = bottomLeftLineMidpoint;
+        }
+
+        private void setBottomRightLineMidpoint(PointF bottomRightLineMidpoint) {
+            mBottomRightLineMidpoint = bottomRightLineMidpoint;
+        }
+
+        private void setBottomRightLineBisectorXAxisIntercept(
+                PointF bottomRightLineBisectorXAxisIntercept) {
+            mBottomRightLineBisectorXAxisIntercept = bottomRightLineBisectorXAxisIntercept;
+        }
+
+        private void setBottomLeftLineBisectorXAxisIntercept(
+                PointF bottomLeftLineBisectorXAxisIntercept) {
+            mBottomLeftLineBisectorXAxisIntercept = bottomLeftLineBisectorXAxisIntercept;
         }
 
         private void setBottomRightTriangleUpperRightVertex(

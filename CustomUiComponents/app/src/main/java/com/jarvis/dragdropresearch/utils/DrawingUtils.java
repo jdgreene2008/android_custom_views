@@ -11,10 +11,12 @@ import com.jarvis.dragdropresearch.funwithshapes.RectangleShape;
 import com.jarvis.dragdropresearch.funwithshapes.SpiralArcDescriptor;
 import com.jarvis.dragdropresearch.funwithshapes.SpiralSegment;
 import com.jarvis.dragdropresearch.funwithshapes.SpiralShape;
+import com.jarvis.dragdropresearch.funwithshapes.StarShape;
 import com.jarvis.dragdropresearch.funwithshapes.TriangleShape;
 import com.jarvis.dragdropresearch.interpolators.AngleInterpolator;
 import com.jarvis.dragdropresearch.interpolators.RectangleInterpolator;
 import com.jarvis.dragdropresearch.interpolators.SpiralInterpolator;
+import com.jarvis.dragdropresearch.interpolators.StarInterpolator;
 import com.jarvis.dragdropresearch.interpolators.TriangleInterpolator;
 
 import java.util.ArrayList;
@@ -342,5 +344,79 @@ public class DrawingUtils {
             path.addArc(segmentBoundsLeft, segmentBoundsTop, segmentBoundsRight,
                     segmentBoundsBottom, 0, 180);
         }
+    }
+
+    /**
+     * Draw a {@link StarShape} onto {@link Canvas} within provided bounds.
+     *
+     * @param canvas {@link Canvas} upon which to draw the star.
+     * @param shape
+     * @param bounds {@link RectF} representing the bounds within the canvas.
+     * @param paint
+     */
+    public static void drawStarShape(Canvas canvas, StarShape shape, RectF bounds,
+            Paint paint) {
+        StarInterpolator interpolator = shape.getStarInterpolator();
+        StarInterpolator.DrawingDescriptor descriptor = interpolator.getDrawingDescriptor();
+
+        Path path = new Path();
+
+        // Draw top triangle
+        path.moveTo(bounds.left + descriptor.getTopTrianglePeak().x,
+                bounds.bottom - descriptor.getTopTrianglePeak().y);
+        path.lineTo(bounds.left + descriptor.getTopTriangleRightVertex().x,
+                bounds.bottom - descriptor.getTopTriangleRightVertex().y);
+        path.lineTo(bounds.left + descriptor.getTopTriangleLeftVertex().x,
+                bounds.bottom - descriptor.getTopTriangleLeftVertex().y);
+        path.close();
+        canvas.drawPath(path, paint);
+
+        path.reset();
+
+        // Draw left triangle
+        path.moveTo(bounds.left + descriptor.getLeftTrianglePeak().x,
+                bounds.bottom - descriptor.getLeftTrianglePeak().y);
+        path.lineTo(bounds.left + descriptor.getLeftTriangleTopVertex().x,
+                bounds.bottom - descriptor.getLeftTriangleTopVertex().y);
+        path.lineTo(bounds.left + descriptor.getLeftTriangleBottomVertex().x,
+                bounds.bottom - descriptor.getLeftTriangleBottomVertex().y);
+        path.close();
+        canvas.drawPath(path, paint);
+
+        path.reset();
+
+        // Draw right triangle
+        path.moveTo(bounds.left + descriptor.getRightTrianglePeak().x,
+                bounds.bottom - descriptor.getRightTrianglePeak().y);
+        path.lineTo(bounds.left + descriptor.getRightTriangleTopVertex().x,
+                bounds.bottom - descriptor.getRightTriangleTopVertex().y);
+        path.lineTo(bounds.left + descriptor.getRightTriangleBottomVertex().x,
+                bounds.bottom - descriptor.getRightTriangleBottomVertex().y);
+        path.close();
+        canvas.drawPath(path, paint);
+
+        path.reset();
+
+        // Draw bottom right triangle
+        path.moveTo(bounds.left + descriptor.getBottomRightTrianglePeak().x,
+                bounds.bottom - descriptor.getBottomRightTrianglePeak().y);
+        path.lineTo(bounds.left + descriptor.getBottomRightTriangleUpperLeftVertex().x,
+                bounds.bottom - descriptor.getBottomRightTriangleUpperLeftVertex().y);
+        path.lineTo(bounds.left + descriptor.getBottomRightTriangleUpperRightVertex().x,
+                bounds.bottom - descriptor.getBottomRightTriangleUpperRightVertex().y);
+        path.close();
+        canvas.drawPath(path, paint);
+
+        path.reset();
+
+        // Draw bottom left triangle
+        path.moveTo(bounds.left + descriptor.getBottomLeftTrianglePeak().x,
+                bounds.bottom - descriptor.getBottomLeftTrianglePeak().y);
+        path.lineTo(bounds.left + descriptor.getBottomLeftTriangleUpperLeftVertex().x,
+                bounds.bottom - descriptor.getBottomLeftTriangleUpperLeftVertex().y);
+        path.lineTo(bounds.left + descriptor.getBottomLeftTriangleUpperRightVertex().x,
+                bounds.bottom - descriptor.getBottomLeftTriangleUpperRightVertex().y);
+        path.close();
+        canvas.drawPath(path, paint);
     }
 }

@@ -13,11 +13,13 @@ import com.jarvis.dragdropresearch.funwithshapes.ArcShape;
 import com.jarvis.dragdropresearch.funwithshapes.FlashShape;
 import com.jarvis.dragdropresearch.funwithshapes.RectangleShape;
 import com.jarvis.dragdropresearch.funwithshapes.SpiralShape;
+import com.jarvis.dragdropresearch.funwithshapes.StarShape;
 import com.jarvis.dragdropresearch.funwithshapes.TriangleShape;
 import com.jarvis.dragdropresearch.interpolators.AngleInterpolator;
 import com.jarvis.dragdropresearch.interpolators.ColorInterpolator;
 import com.jarvis.dragdropresearch.interpolators.RectangleInterpolator;
 import com.jarvis.dragdropresearch.interpolators.SpiralInterpolator;
+import com.jarvis.dragdropresearch.interpolators.StarInterpolator;
 import com.jarvis.dragdropresearch.interpolators.TriangleInterpolator;
 import com.jarvis.dragdropresearch.utils.DrawingUtils;
 
@@ -87,14 +89,16 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
             mPages.add(page);
 
             FlashShape shape;
-            if (i % 4 == 0) {
+            if (i % 5 == 0) {
                 shape = getArcShape(page);
-            } else if (i % 4 == 1) {
+            } else if (i % 5 == 1) {
                 shape = getTriangleShape(page);
-            } else if (i % 4 == 2) {
+            } else if (i % 5 == 2) {
                 shape = getRectangleShape(page);
-            } else {
+            } else if (i % 5 == 3) {
                 shape = getSpiralShape(page);
+            } else {
+                shape = getStarShape(page);
             }
 
             ColorInterpolator shapeColorInterpolator = new ColorInterpolator(page.getHeight());
@@ -178,6 +182,21 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
         shape.setAngleInterpolator(angleInterpolator);
         return shape;
     }
+
+    private StarShape getStarShape(FlashShapePage page) {
+        StarShape shape = new StarShape();
+        shape.setXOffset((int)((page.getWidth() / 2 -
+                mMaxShapeWidth / 2) + getPaddingStart()));
+        shape.setYOffset((int)(page.getHeight() / 2 - mMaxShapeHeight / 2 + getPaddingTop()));
+        shape.setAllowMulticoloredComponents(true);
+        shape.generateRandomComponentColors();
+
+        StarInterpolator.Builder builder = new StarInterpolator.Builder(page.getHeight());
+        builder.setHeight(mMaxShapeHeight)
+                .setWidth(mMaxShapeWidth);
+        shape.setStarInterpolator(builder.build());
+        return shape;
+    }
     //endregion
 
     @Override
@@ -228,6 +247,8 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
             drawRectangleShape(canvas, page);
         } else if (shape instanceof SpiralShape) {
             drawSpiralShape(canvas, page);
+        } else if(shape instanceof StarShape){
+            drawStarShape(canvas,page);
         }
     }
 
@@ -347,11 +368,41 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
                             paint);
         } else {
             colorInterpolator.updateValue(getContentBoundsBottom() - page.getYPosition());
-            shape.getSpiralInterpolator().updateValue(getContentBoundsBottom() - page.getYPosition());
+            shape.getSpiralInterpolator()
+                    .updateValue(getContentBoundsBottom() - page.getYPosition());
             paint.setColor(colorInterpolator.getInterpolatedShade());
 
             DrawingUtils
                     .drawSpiralShape(canvas, shape, getCommonShapeBoundingRect(page, shape, false),
+                            paint);
+        }
+    }
+
+    //endregion
+    //region Star Shape Drawing
+    private void drawStarShape(Canvas canvas, FlashShapePage page) {
+        StarShape shape = (StarShape)page.getFlashShape();
+
+        Paint paint = new Paint();
+        paint.setStyle(Paint.Style.FILL);
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER));
+        paint.setStrokeWidth(10);
+        ColorInterpolator colorInterpolator = shape.getColorInterpolator();
+
+        if (pageShapeScrolledToTop(page, shape)) {
+            paint.setColor(colorInterpolator.getInterpolatedShade());
+
+            DrawingUtils
+                    .drawStarShape(canvas, shape, getCommonShapeBoundingRect(page, shape, true),
+                            paint);
+        } else {
+            colorInterpolator.updateValue(getContentBoundsBottom() - page.getYPosition());
+            shape.getStarInterpolator()
+                    .updateValue(getContentBoundsBottom() - page.getYPosition());
+            paint.setColor(colorInterpolator.getInterpolatedShade());
+
+            DrawingUtils
+                    .drawStarShape(canvas, shape, getCommonShapeBoundingRect(page, shape, false),
                             paint);
         }
     }
@@ -372,7 +423,7 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
             float boundingRectTop = page.getYPosition() + shape.getYOffset() + getPaddingTop();
             float boundingRectLeft = page.getXPosition() + shape.getXOffset();
             float boundingRectRight = boundingRectLeft + mMaxShapeWidth;
-            float boundingRectBottom = boundingRectTop + mMaxShapeWidth;
+            float boundingRectBottom = boundingRectTop + mMaxShapeHeight;
 
             return new RectF(boundingRectLeft, boundingRectTop, boundingRectRight,
                     boundingRectBottom);

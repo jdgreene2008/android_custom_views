@@ -6,6 +6,7 @@ import androidx.annotation.Nullable;
 
 public class Line extends Equation {
     private static final String TAG = Line.class.getName();
+    private static final float PRECISION = 0.01f;
     private static final String DESCRIPTION =
             "Represents the slope-intercept form of an equation for a line.";
 
@@ -56,11 +57,11 @@ public class Line extends Equation {
 
     public boolean containsPoint(PointF point) {
         if (mType == Type.HORIZONTAL) {
-            return point.y == mYIntercept;
+            return Math.abs(point.y - mYIntercept) <= PRECISION;
         } else if (mType == Type.VERTICAL) {
-            return point.x == mXIntercept;
+            return Math.abs(point.x - mXIntercept) <= PRECISION;
         } else {
-            return point.x == (point.y - mYIntercept) / mSlope;
+            return Math.abs(point.x - ((point.y - mYIntercept) / mSlope)) <= PRECISION;
         }
     }
 
