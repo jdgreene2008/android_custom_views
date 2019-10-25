@@ -3,7 +3,7 @@ package com.jarvis.dragdropresearch.funwithshapes;
 import android.graphics.RectF;
 
 /**
- * Descripes the arc that makes up a part of a spiral path.
+ * Describes the arc that makes up a part of a spiral path.
  */
 public class SpiralArcDescriptor {
 

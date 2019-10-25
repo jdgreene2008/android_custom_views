@@ -1,13 +1,13 @@
 package com.jarvis.dragdropresearch.funwithshapes;
 
+import com.jarvis.dragdropresearch.funwithshapes.enums.ColorPalette;
 import com.jarvis.dragdropresearch.interpolators.AlphaInterpolator;
 import com.jarvis.dragdropresearch.interpolators.ColorInterpolator;
 
 import java.util.Random;
 
 public abstract class FlashShape {
-    private static final int[] COMPONENT_COLOR_POOL_DEFAULT =
-            new int[] {0xFF6BBAEC, 0xFFC0A9B0,0xFFBCC4DB,0xFF4F7CAC};
+    private static final int[] COMPONENT_COLOR_POOL_DEFAULT = ColorPalette.ONE.getValues();
 
     private Type mType;
 

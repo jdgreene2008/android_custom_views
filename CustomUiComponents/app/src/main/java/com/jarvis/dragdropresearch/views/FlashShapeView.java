@@ -42,6 +42,7 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
 
     private float mMaxShapeWidth;
     private float mMaxShapeHeight;
+    private ColorPalette mColorPalette = ColorPalette.THREE;
 
     public FlashShapeView(@NonNull Context context) {
         super(context);
@@ -126,7 +127,7 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
         shape.setXOffset((int)(page.getWidth() / 2 -
                 mMaxShapeWidth / 2));
         shape.setYOffset((int)(page.getHeight() / 2 - mMaxShapeHeight / 2));
-        shape.setComponentColorPool(ColorPalette.ONE.getValues());
+        shape.setComponentColorPool(mColorPalette.getValues());
         shape.generateRandomComponentColors();        shape.setAllowMulticoloredComponents(true);
 
         TriangleInterpolator interpolator =
@@ -142,7 +143,7 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
         shape.setXOffset((int)(page.getWidth() / 2 -
                 mMaxShapeWidth / 2));
         shape.setYOffset((int)(page.getHeight() / 2 - mMaxShapeHeight / 2));
-        shape.setComponentColorPool(ColorPalette.ONE.getValues());
+        shape.setComponentColorPool(mColorPalette.getValues());
         shape.generateRandomComponentColors();
         shape.setAllowMulticoloredComponents(random.nextInt(300) % 10 < 5);
 
@@ -159,7 +160,7 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
                 mMaxShapeWidth / 2));
         shape.setYOffset((int)(page.getHeight() / 2 - mMaxShapeHeight / 2));
         shape.setAllowMulticoloredComponents(true);
-        shape.setComponentColorPool(ColorPalette.ONE.getValues());
+        shape.setComponentColorPool(mColorPalette.getValues());
         shape.generateRandomComponentColors();
 
         RectangleInterpolator interpolator =
@@ -175,7 +176,7 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
                 mMaxShapeWidth / 2) + getPaddingStart()));
         shape.setYOffset((int)(page.getHeight() / 2 - mMaxShapeHeight / 2 + getPaddingTop()));
         shape.setAllowMulticoloredComponents(true);
-        shape.setComponentColorPool(ColorPalette.ONE.getValues());
+        shape.setComponentColorPool(mColorPalette.getValues());
         shape.generateRandomComponentColors();
 
         AngleInterpolator angleInterpolator = new AngleInterpolator(page.getHeight());
@@ -190,7 +191,7 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
                 mMaxShapeWidth / 2) + getPaddingStart()));
         shape.setYOffset((int)(page.getHeight() / 2 - mMaxShapeHeight / 2 + getPaddingTop()));
         shape.setAllowMulticoloredComponents(true);
-        shape.setComponentColorPool(ColorPalette.ONE.getValues());
+        shape.setComponentColorPool(mColorPalette.getValues());
         shape.generateRandomComponentColors();
 
         StarInterpolator.Builder builder = new StarInterpolator.Builder(page.getHeight());
