@@ -15,6 +15,7 @@ import com.jarvis.dragdropresearch.funwithshapes.RectangleShape;
 import com.jarvis.dragdropresearch.funwithshapes.SpiralShape;
 import com.jarvis.dragdropresearch.funwithshapes.StarShape;
 import com.jarvis.dragdropresearch.funwithshapes.TriangleShape;
+import com.jarvis.dragdropresearch.funwithshapes.enums.ColorPalette;
 import com.jarvis.dragdropresearch.interpolators.AngleInterpolator;
 import com.jarvis.dragdropresearch.interpolators.ColorInterpolator;
 import com.jarvis.dragdropresearch.interpolators.RectangleInterpolator;
@@ -34,7 +35,7 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
     private static final String TAG = FlashShapeView.class.getName();
     private static final int PAGE_COUNT = 50;
     private static final int[] COLORS_BACKGROUNDS =
-            new int[] {Color.LTGRAY, Color.BLACK};
+            new int[] {Color.WHITE};
     private static final int[] SHAPE_COLORS =
             new int[] {Color.RED, Color.WHITE, Color.BLUE, Color.GREEN,
                     Color.YELLOW};
@@ -125,8 +126,8 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
         shape.setXOffset((int)(page.getWidth() / 2 -
                 mMaxShapeWidth / 2));
         shape.setYOffset((int)(page.getHeight() / 2 - mMaxShapeHeight / 2));
-        shape.generateRandomComponentColors();
-        shape.setAllowMulticoloredComponents(true);
+        shape.setComponentColorPool(ColorPalette.ONE.getValues());
+        shape.generateRandomComponentColors();        shape.setAllowMulticoloredComponents(true);
 
         TriangleInterpolator interpolator =
                 new TriangleInterpolator(page.getHeight(), mMaxShapeHeight, mMaxShapeWidth,
@@ -141,6 +142,7 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
         shape.setXOffset((int)(page.getWidth() / 2 -
                 mMaxShapeWidth / 2));
         shape.setYOffset((int)(page.getHeight() / 2 - mMaxShapeHeight / 2));
+        shape.setComponentColorPool(ColorPalette.ONE.getValues());
         shape.generateRandomComponentColors();
         shape.setAllowMulticoloredComponents(random.nextInt(300) % 10 < 5);
 
@@ -157,6 +159,7 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
                 mMaxShapeWidth / 2));
         shape.setYOffset((int)(page.getHeight() / 2 - mMaxShapeHeight / 2));
         shape.setAllowMulticoloredComponents(true);
+        shape.setComponentColorPool(ColorPalette.ONE.getValues());
         shape.generateRandomComponentColors();
 
         RectangleInterpolator interpolator =
@@ -172,6 +175,7 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
                 mMaxShapeWidth / 2) + getPaddingStart()));
         shape.setYOffset((int)(page.getHeight() / 2 - mMaxShapeHeight / 2 + getPaddingTop()));
         shape.setAllowMulticoloredComponents(true);
+        shape.setComponentColorPool(ColorPalette.ONE.getValues());
         shape.generateRandomComponentColors();
 
         AngleInterpolator angleInterpolator = new AngleInterpolator(page.getHeight());
@@ -186,6 +190,7 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
                 mMaxShapeWidth / 2) + getPaddingStart()));
         shape.setYOffset((int)(page.getHeight() / 2 - mMaxShapeHeight / 2 + getPaddingTop()));
         shape.setAllowMulticoloredComponents(true);
+        shape.setComponentColorPool(ColorPalette.ONE.getValues());
         shape.generateRandomComponentColors();
 
         StarInterpolator.Builder builder = new StarInterpolator.Builder(page.getHeight());
@@ -244,8 +249,8 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
             drawRectangleShape(canvas, page);
         } else if (shape instanceof SpiralShape) {
             drawSpiralShape(canvas, page);
-        } else if(shape instanceof StarShape){
-            drawStarShape(canvas,page);
+        } else if (shape instanceof StarShape) {
+            drawStarShape(canvas, page);
         }
     }
 
