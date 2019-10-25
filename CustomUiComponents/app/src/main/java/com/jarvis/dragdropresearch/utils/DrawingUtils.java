@@ -20,6 +20,7 @@ import com.jarvis.dragdropresearch.interpolators.StarInterpolator;
 import com.jarvis.dragdropresearch.interpolators.TriangleInterpolator;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -360,7 +361,12 @@ public class DrawingUtils {
         StarInterpolator.DrawingDescriptor descriptor = interpolator.getDrawingDescriptor();
 
         Path path = new Path();
+        int[] componentColors = shape.getComponentColors();
+        if (!shape.allowMultiColoredComponents()) {
+            Arrays.fill(componentColors, paint.getColor());
+        }
 
+        int colorIndex = 0;
         // Draw top triangle
         path.moveTo(bounds.left + descriptor.getTopTrianglePeak().x,
                 bounds.bottom - descriptor.getTopTrianglePeak().y);
@@ -369,6 +375,7 @@ public class DrawingUtils {
         path.lineTo(bounds.left + descriptor.getTopTriangleLeftVertex().x,
                 bounds.bottom - descriptor.getTopTriangleLeftVertex().y);
         path.close();
+        paint.setColor(componentColors[colorIndex++ % componentColors.length]);
         canvas.drawPath(path, paint);
 
         path.reset();
@@ -381,6 +388,7 @@ public class DrawingUtils {
         path.lineTo(bounds.left + descriptor.getLeftTriangleBottomVertex().x,
                 bounds.bottom - descriptor.getLeftTriangleBottomVertex().y);
         path.close();
+        paint.setColor(componentColors[colorIndex++ % componentColors.length]);
         canvas.drawPath(path, paint);
 
         path.reset();
@@ -393,6 +401,7 @@ public class DrawingUtils {
         path.lineTo(bounds.left + descriptor.getRightTriangleBottomVertex().x,
                 bounds.bottom - descriptor.getRightTriangleBottomVertex().y);
         path.close();
+        paint.setColor(componentColors[colorIndex++ % componentColors.length]);
         canvas.drawPath(path, paint);
 
         path.reset();
@@ -405,6 +414,7 @@ public class DrawingUtils {
         path.lineTo(bounds.left + descriptor.getBottomRightTriangleUpperRightVertex().x,
                 bounds.bottom - descriptor.getBottomRightTriangleUpperRightVertex().y);
         path.close();
+        paint.setColor(componentColors[colorIndex++ % componentColors.length]);
         canvas.drawPath(path, paint);
 
         path.reset();
@@ -417,6 +427,7 @@ public class DrawingUtils {
         path.lineTo(bounds.left + descriptor.getBottomLeftTriangleUpperRightVertex().x,
                 bounds.bottom - descriptor.getBottomLeftTriangleUpperRightVertex().y);
         path.close();
+        paint.setColor(componentColors[colorIndex % componentColors.length]);
         canvas.drawPath(path, paint);
     }
 }

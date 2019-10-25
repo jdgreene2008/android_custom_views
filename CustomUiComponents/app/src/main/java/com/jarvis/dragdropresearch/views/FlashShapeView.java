@@ -125,9 +125,6 @@ public class FlashShapeView extends AbsCustomScrollingView<FlashShapePage> {
         shape.setXOffset((int)(page.getWidth() / 2 -
                 mMaxShapeWidth / 2));
         shape.setYOffset((int)(page.getHeight() / 2 - mMaxShapeHeight / 2));
-        shape.setComponentColorPool(
-                new int[] {Color.GREEN, Color.MAGENTA, Color.RED, Color.CYAN, Color.YELLOW,
-                        Color.BLUE});
         shape.generateRandomComponentColors();
         shape.setAllowMulticoloredComponents(true);
 
