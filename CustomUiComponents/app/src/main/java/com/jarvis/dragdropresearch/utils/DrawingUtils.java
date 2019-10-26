@@ -5,6 +5,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
 import android.os.Build;
+import android.util.Pair;
 
 import com.jarvis.dragdropresearch.funwithshapes.ArcShape;
 import com.jarvis.dragdropresearch.funwithshapes.RectangleShape;
@@ -43,36 +44,19 @@ public class DrawingUtils {
     public static void drawArcShape(Canvas canvas, ArcShape shape, RectF boundingRect,
             Paint paint) {
         AngleInterpolator angleInterpolator = shape.getAngleInterpolator();
-        float interpolatedAngle = angleInterpolator.getInterpolatedAngle();
 
-        if (shape.allowMultiColoredComponents()) {
-            // Number of degrees that each component will take up in the arc.
-            float angleFactor = 360.0f / shape.getMaxComponents();
+        List<Pair<Float, Float>> drawingAngles =
+                angleInterpolator.getDrawingDescriptor().getDrawingAngles();
 
-            // Total number of components that makeup the current interpolated angle.
-            int componentCount = (int)Math.floor(interpolatedAngle / angleFactor);
+        if (drawingAngles == null || drawingAngles.isEmpty()) return;
 
-            // Left-over degrees after dividing the interpolated angle by the angle factor.
-            float componentModulus = interpolatedAngle % angleFactor;
-
-            int[] componentColors = shape.getComponentColors();
-
-            float currentStartAngle = 0;
-            for (int i = 0; i < componentCount; i++) {
-                paint.setColor(componentColors[i % componentColors.length]);
-                canvas.drawArc(boundingRect, currentStartAngle,
-                        angleFactor, true, paint);
-                currentStartAngle += angleFactor;
+        for (int i = 0; i < drawingAngles.size(); i++) {
+            Pair<Float, Float> current = drawingAngles.get(i);
+            if (shape.allowMultiColoredComponents()) {
+                paint.setColor(shape.getComponentColors()[i % shape.getComponentColors().length]);
             }
-
-            if (componentModulus != 0) {
-                paint.setColor(componentColors[componentCount % componentColors.length]);
-                canvas.drawArc(boundingRect, currentStartAngle,
-                        componentModulus, true, paint);
-            }
-        } else {
-            canvas.drawArc(boundingRect, 0,
-                    angleInterpolator.getInterpolatedAngle(), true, paint);
+            canvas.drawArc(boundingRect, current.first,
+                    current.second, true, paint);
         }
     }
 
