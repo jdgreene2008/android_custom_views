@@ -71,66 +71,20 @@ public class DrawingUtils {
     public static void drawRectangleShape(Canvas canvas, RectangleShape shape, RectF bounds,
             Paint paint) {
         RectangleInterpolator interpolator = shape.getRectangleInterpolator();
-        float[] interpolatedDimensions = interpolator.getInterpolatedDimensions();
-        float interpolatedWidth =
-                interpolatedDimensions[RectangleInterpolator.INTERPOLATION_VALUES_WIDTH];
-        float interpolatedHeight =
-                interpolatedDimensions[RectangleInterpolator.INTERPOLATION_VALUES_HEIGHT];
+        RectangleInterpolator.DrawingDescriptor drawingDescriptor =
+                interpolator.getDrawingDescriptor();
+        List<RectF> components = drawingDescriptor.getRectangleComponents();
 
-        if (!interpolator.isSymmetric()) {
-            float top = bounds.bottom - interpolatedHeight;
-            float bottom = bounds.bottom;
-            float left = bounds.left;
-            float right = left + interpolatedWidth;
-
-            canvas.drawRect(left, top, right, bottom, paint);
-        } else {
-            int[] componentColors = shape.getComponentColors();
-            boolean allowMultiColoredComponents = shape.allowMultiColoredComponents();
-
-            // Bottom Left Rectangle
-            float top = bounds.bottom - interpolatedHeight;
-            float bottom = bounds.bottom;
-            float left = bounds.left;
-            float right = left + interpolatedWidth;
-
+        int[] componentColors = shape.getComponentColors();
+        boolean allowMultiColoredComponents = shape.allowMultiColoredComponents();
+        int count = 0;
+        for (RectF component : components) {
             if (allowMultiColoredComponents) {
-                paint.setColor(componentColors[0 % componentColors.length]);
+                paint.setColor(componentColors[count++ % componentColors.length]);
             }
-            canvas.drawRect(left, top, right, bottom, paint);
-
-            // Bottom Right Rectangle
-            top = bounds.bottom - interpolatedHeight;
-            bottom = bounds.bottom;
-            left = bounds.right - interpolatedWidth;
-            right = bounds.right;
-
-            if (allowMultiColoredComponents) {
-                paint.setColor(componentColors[1 % componentColors.length]);
-            }
-            canvas.drawRect(left, top, right, bottom, paint);
-
-            // Top Left Rectangle
-            top = bounds.top;
-            bottom = bounds.top + interpolatedHeight;
-            left = bounds.left;
-            right = bounds.left + interpolatedWidth;
-
-            if (allowMultiColoredComponents) {
-                paint.setColor(componentColors[2 % componentColors.length]);
-            }
-            canvas.drawRect(left, top, right, bottom, paint);
-
-            // Top Right Rectangle
-            top = bounds.top;
-            bottom = bounds.top + interpolatedHeight;
-            left = bounds.right - interpolatedWidth;
-            right = bounds.right;
-
-            if (allowMultiColoredComponents) {
-                paint.setColor(componentColors[3 % componentColors.length]);
-            }
-            canvas.drawRect(left, top, right, bottom, paint);
+            canvas.drawRect(bounds.left + component.left, bounds.top + component.top,
+                    bounds.left + component.right,
+                    bounds.top + component.bottom, paint);
         }
     }
 
