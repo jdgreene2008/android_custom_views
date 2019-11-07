@@ -105,7 +105,7 @@ abstract class FlashShape(type: Type) {
      * @see .COMPONENT_COLOR_POOL_DEFAULT
      */
     fun setComponentColorPool(componentColorPool: IntArray?) {
-        if (componentColorPool != null && componentColorPool.size > 0) {
+        if (componentColorPool != null && componentColorPool.isNotEmpty()) {
             mComponentColorPool = componentColorPool
         } else {
             mComponentColorPool = COMPONENT_COLOR_POOL_DEFAULT
